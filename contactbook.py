@@ -26,11 +26,12 @@ class Contact:
 
     @phone.setter
     def phone(self, new_phone:str)->None:
-        pattern=re.compile("\d{9}")
+        pattern=re.compile("(?:\+\d{1,3} ?)?(?:\d[- ]?){8}\d")
         if not pattern.fullmatch(new_phone):
             raise WrongInputError(f"Incorrect phone number: {new_phone}")
         else:
-            self._phone=new_phone
+            normalized_phone_num=''.join(filter(lambda char: char.isdigit(),new_phone))
+            self._phone=normalized_phone_num
 
     @property
     def email(self):

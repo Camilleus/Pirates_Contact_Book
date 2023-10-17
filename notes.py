@@ -1,8 +1,7 @@
 
 class Note:
-    def __init__(self,title:str='Title',note_contents:str='',*tags:str)->None:
-        self.title=title
-        self.tags=list(tags)+[title]
+    def __init__(self,note_contents:str='',*tags:str)->None:
+        self.tags=list(tags)
         self.note_contents=note_contents
 
     def add_tags(self,*new_tags:str)->None:

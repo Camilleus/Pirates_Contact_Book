@@ -74,11 +74,7 @@ while True:
         date_of_birth = console.input(f"Enter date of birth [{QUESTION}]<dd.mm.rrrr>[/]: ")
 
         new_contact = Contact(name, last_name, address, phone, e_mail, date_of_birth)
-
-        # contact_book.add_contact(new_contact)
-
-        pass
-
+        contact_book.add_contact(new_contact)
 
     elif command == "edit":
         contact_to_edit = console.input(f"Which contact do you want to edit [{QUESTION}]<name last_name>[/]: ").casefold()

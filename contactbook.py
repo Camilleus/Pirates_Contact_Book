@@ -14,14 +14,6 @@ class Contact:
         self.email = email
         self.date_of_birth = date_of_birth
         self.note = note
-        self.contact = {
-            "name": self.name,
-            "last name": self.last_name,
-            "address": self.address,
-            "phone": self.phone,
-            "email": self.email,
-            "date_of_birth": self.date_of_birth
-        }
 
     @property
     def phone(self):

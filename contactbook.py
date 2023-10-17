@@ -2,17 +2,18 @@ import csv
 import re
 from datetime import date, datetime, timedelta
 from custom_errors import WrongInputError
+import os.path
 
 
 class Contact:
-    def __init__(self, name, last_name, address, phone, email, date_of_birth):
-        self.name = name   # Ew. ograniczenie ilości znaków
-        self.last_name = last_name  # Ew. ograniczenie ilości znaków
-        self.address = address  # Ew. ograniczenie ilości znaków
-        self.phone = phone  # Sprawdzanie poprawności wprowadzonego numeru telefonu
-        self.email = email  # Sprawdzanie poprawności wprowadzonego email
-        # Sprawdzanie poprawności formatu wprowadzonej daty urodzin
+    def __init__(self, name, last_name, phone, email=None, date_of_birth=None, address=None, note=None):
+        self.name = name
+        self.last_name = last_name
+        self.address = address
+        self.phone = phone
+        self.email = email
         self.date_of_birth = date_of_birth
+        self.note = note
         self.contact = {
             "name": self.name,
             "last name": self.last_name,
@@ -73,22 +74,36 @@ class Contact:
 
 
 class ContactBook:
-    def add_contact(self):
-        with open("contact_book.csv", "a", newline="") as fh:
-            field_names = ["name", "last name", "address",
-                           "phone", "email", "date_of_birth"]
-            writer = csv.DictWriter(fh, fieldnames=field_names)
-            writer.writeheader()
-            writer.writerow()  # Instancja klasy Contact w formie słownika
+    def __init__(self, contact_book_file_path="contact_book.csv"):
+        self.contact_book_file_path = contact_book_file_path
+        self.field_names = ["name", "last name", "address", "phone", "email", "date_of_birth", "note"]
 
-    def edit_contact(self):
+        if not os.path.isfile(self.contact_book_file_path):
+            with open(self.contact_book_file_path, 'w', newline='') as fh:
+                writer = csv.DictWriter(fh, fieldnames=self.field_names)
+                writer.writeheader()
+    def add_contact(self, contact):
+        contact = contact.__dict__
+        with open(self.contact_book_file_path, "a", newline="") as fh:
+            writer = csv.DictWriter(fh, fieldnames=self.field_names)
+            writer.writerow(contact)
+
+    def edit_contact(self, info):
         pass
 
     def remove_contact(self):
         pass
 
-    def search(self):
-        pass
+    def search_contact(self, text):
+        with open(self.contact_book_file_path, "r", newline="") as fh:
+            reader = csv.reader(fh)
+
+            for row in reader:
+                row_string = ",".join(row[:-1]).casefold()
+                if row_string.find(text.casefold()) >= 0:
+                    return dict(zip(self.field_names, row))
+                else:
+                    return "Contact not found"
 
     def show_all_contacts(self):
         with open('contact_book.csv', newline='') as fh:

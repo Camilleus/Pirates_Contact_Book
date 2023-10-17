@@ -76,7 +76,7 @@ class Contact:
 class ContactBook:
     def __init__(self, contact_book_file_path="contact_book.csv"):
         self.contact_book_file_path = contact_book_file_path
-        self.field_names = ["name", "last name", "address", "phone", "email", "date_of_birth", "note"]
+        self.field_names = ["name", "last name", "phone", "email", "date_of_birth", "address", "note"]
 
         if not os.path.isfile(self.contact_book_file_path):
             with open(self.contact_book_file_path, 'w', newline='') as fh:

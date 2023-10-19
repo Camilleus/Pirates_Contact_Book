@@ -81,6 +81,7 @@ class ContactBook:
                 writer.writeheader()
     def add_contact(self, contact):
         contact = contact.__dict__
+        contact['note'] = contact['note'].note_contents
         with open(self.contact_book_file_path, "a", newline="") as fh:
             writer = csv.DictWriter(fh, fieldnames=self.field_names)
             writer.writerow(contact)
@@ -88,20 +89,20 @@ class ContactBook:
     def edit_contact(self, info):
         pass
 
-    def remove_contact(self):
+    def remove_contact(self, id):
         pass
 
     def search_contact(self, phrase):
         with open(self.contact_book_file_path, "r", newline="") as fh:
             reader = csv.reader(fh)
-            results = {}
-            n = 1
+            results = []
             for row in reader:
                 row_string = ",".join(row[:-2]).casefold()
                 if row_string.find(phrase.casefold()) >= 0:
-                    results[n] = dict(zip(self.field_names, row))
-                    n+=1
+                    results.append(dict(zip(self.field_names, row)))
         if results:
+            if results[0]=={'name': 'name', 'last_name': 'last_name', '_phone': '_phone', '_email': '_email', '_date_of_birth': '_date_of_birth', 'address': 'address', 'note': 'note', 'tags': 'tags'}:
+                return results[1:]
             return results
         else:
             return "Contact not found"
@@ -121,14 +122,15 @@ class ContactBook:
         with open('contact_book.csv', newline='') as fh:
             reader = csv.DictReader(fh)
             for row in reader:
-                date_obj = datetime.strptime(
-                    row["_date_of_birth"], '%Y-%m-%d')
-                date_start_year = datetime(year=start_date.year,
-                                           month=date_obj.month, day=date_obj.day)
-                date_end_year = datetime(year=end_date.year,
-                                         month=date_obj.month, day=date_obj.day)
-                if start_date < date_start_year or date_end_year <= end_date:
-                    result_list.append(row)
+                if row["_date_of_birth"] !="":
+                    date_obj = datetime.strptime(
+                        row["_date_of_birth"], '%Y-%m-%d')
+                    date_start_year = datetime(year=start_date.year,
+                                               month=date_obj.month, day=date_obj.day)
+                    date_end_year = datetime(year=end_date.year,
+                                             month=date_obj.month, day=date_obj.day)
+                    if start_date < date_start_year or date_end_year <= end_date:
+                        result_list.append(row)
         return result_list
 
     def search_note_by_tags(self,searched_tags:list)->dict[str:str]:

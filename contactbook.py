@@ -71,7 +71,7 @@ class Contact:
 class ContactBook:
     def __init__(self, contact_book_file_path="contact_book.csv"):
         self.contact_book_file_path = contact_book_file_path
-        self.field_names = ["name", "last name", "phone", "email", "date_of_birth", "address", "note","tags"]
+        self.field_names = ["name", "last_name", "phone", "email", "date_of_birth", "address", "note", "tags"]
 
         if not os.path.isfile(self.contact_book_file_path):
             with open(self.contact_book_file_path, 'w', newline='') as fh:
@@ -89,16 +89,20 @@ class ContactBook:
     def remove_contact(self):
         pass
 
-    def search_contact(self, text):
+    def search_contact(self, phrase):
         with open(self.contact_book_file_path, "r", newline="") as fh:
             reader = csv.reader(fh)
-
+            results = {}
+            n = 1
             for row in reader:
-                row_string = ",".join(row[:-1]).casefold()
-                if row_string.find(text.casefold()) >= 0:
-                    return dict(zip(self.field_names, row))
-                else:
-                    return "Contact not found"
+                row_string = ",".join(row[:-2]).casefold()
+                if row_string.find(phrase.casefold()) >= 0:
+                    results[n] = dict(zip(self.field_names, row))
+                    n+=1
+        if results:
+            return results
+        else:
+            return "Contact not found"
 
     def show_all_contacts(self):
         with open('contact_book.csv', newline='') as fh:

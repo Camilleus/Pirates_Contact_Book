@@ -71,7 +71,9 @@ class Contact:
 class ContactBook:
     def __init__(self, contact_book_file_path="contact_book.csv"):
         self.contact_book_file_path = contact_book_file_path
-        self.field_names = ["name", "last_name", "phone", "email", "date_of_birth", "address", "note", "tags"]
+
+        self.field_names = ["name", "last_name", "_phone", "_email", "_date_of_birth", "address", "note", "tags"]
+
 
         if not os.path.isfile(self.contact_book_file_path):
             with open(self.contact_book_file_path, 'w', newline='') as fh:
@@ -106,20 +108,21 @@ class ContactBook:
 
     def show_all_contacts(self):
         with open('contact_book.csv', newline='') as fh:
+            list_of_contacts = []
             reader = csv.DictReader(fh)
             for row in reader:
-                print(row["name"], row['last_name'], row['address'],
-                      row['phone'], row['email'], row['date_of_birth'])
+                list_of_contacts.append(row)
+            return list_of_contacts
 
-    def birthdays_in_dyas_range(self, days_range):
+    def birthdays_in_days_range(self, days_range):
         start_date = datetime.now()
-        end_date = datetime.now() + timedelta(days=days_range)
+        end_date = datetime.now() + timedelta(days=int(days_range))
         result_list = []
         with open('contact_book.csv', newline='') as fh:
             reader = csv.DictReader(fh)
             for row in reader:
                 date_obj = datetime.strptime(
-                    row["date_of_birth"], '%Y-%m-%d')
+                    row["_date_of_birth"], '%Y-%m-%d')
                 date_start_year = datetime(year=start_date.year,
                                            month=date_obj.month, day=date_obj.day)
                 date_end_year = datetime(year=end_date.year,

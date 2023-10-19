@@ -21,6 +21,7 @@ class Contact:
 
     @phone.setter
     def phone(self, new_phone: str) -> None:
+        if not new_phone: return
         pattern = re.compile("(?:\+\d{1,3} ?)?(?:\d[- ]?){8}\d")
         if not pattern.fullmatch(new_phone):
             raise WrongInputError(f"Incorrect phone number: {new_phone}")
@@ -35,6 +36,7 @@ class Contact:
 
     @email.setter
     def email(self, new_email: str) -> None:
+        if not new_email: return
         pattern = re.compile("[a-zA-Z][\w.-]+@\w+\.\w{2,}")
         if not pattern.fullmatch(new_email):
             raise WrongInputError(f"Incorrect email: {new_email}")
@@ -48,6 +50,7 @@ class Contact:
     @date_of_birth.setter
     # date expected to be in dd.mm.yyyy format
     def date_of_birth(self, new_date_of_birth: str) -> None:
+        if not new_date_of_birth: return
         pattern = re.compile("\d{2}\.\d{2}\.\d{4}")
         if not pattern.fullmatch(new_date_of_birth):
             raise WrongInputError(
@@ -68,7 +71,7 @@ class Contact:
 class ContactBook:
     def __init__(self, contact_book_file_path="contact_book.csv"):
         self.contact_book_file_path = contact_book_file_path
-        self.field_names = ["name", "last name", "phone", "email", "date_of_birth", "address", "note"]
+        self.field_names = ["name", "last_name", "address", "_phone", "_email", "_date_of_birth", "note"]
 
         if not os.path.isfile(self.contact_book_file_path):
             with open(self.contact_book_file_path, 'w', newline='') as fh:
@@ -86,33 +89,38 @@ class ContactBook:
     def remove_contact(self):
         pass
 
-    def search_contact(self, text):
+    def search_contact(self, phrase):
         with open(self.contact_book_file_path, "r", newline="") as fh:
             reader = csv.reader(fh)
-
-            for row in reader:
-                row_string = ",".join(row[:-1]).casefold()
-                if row_string.find(text.casefold()) >= 0:
-                    return dict(zip(self.field_names, row))
-                else:
-                    return "Contact not found"
+            results = {}
+            n = 1
+            for row in enumerate(reader):
+                row_string = ",".join(row[:-2]).casefold()
+                if row_string.find(phrase.casefold()) >= 0:
+                    results[n] = (dict(zip(self.field_names, row)))
+                    n+=1
+            if results:
+                return results
+            else:
+                return "Contact not found"
 
     def show_all_contacts(self):
         with open('contact_book.csv', newline='') as fh:
+            list_of_contacts = []
             reader = csv.DictReader(fh)
             for row in reader:
-                print(row["name"], row['last_name'], row['address'],
-                      row['phone'], row['email'], row['date_of_birth'])
+                list_of_contacts.append(row)
+            return list_of_contacts
 
-    def birthdays_in_dyas_range(self, days_range):
+    def birthdays_in_days_range(self, days_range):
         start_date = datetime.now()
-        end_date = datetime.now() + timedelta(days=days_range)
+        end_date = datetime.now() + timedelta(days=int(days_range))
         result_list = []
         with open('contact_book.csv', newline='') as fh:
             reader = csv.DictReader(fh)
             for row in reader:
                 date_obj = datetime.strptime(
-                    row["date_of_birth"], '%Y-%m-%d')
+                    row["_date_of_birth"], '%Y-%m-%d')
                 date_start_year = datetime(year=start_date.year,
                                            month=date_obj.month, day=date_obj.day)
                 date_end_year = datetime(year=end_date.year,

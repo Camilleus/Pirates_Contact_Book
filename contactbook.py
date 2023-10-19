@@ -71,7 +71,9 @@ class Contact:
 class ContactBook:
     def __init__(self, contact_book_file_path="contact_book.csv"):
         self.contact_book_file_path = contact_book_file_path
-        self.field_names = ["name", "last_name", "address", "_phone", "_email", "_date_of_birth", "note"]
+
+        self.field_names = ["name", "last_name", "_phone", "_email", "_date_of_birth", "address", "note", "tags"]
+
 
         if not os.path.isfile(self.contact_book_file_path):
             with open(self.contact_book_file_path, 'w', newline='') as fh:
@@ -94,15 +96,15 @@ class ContactBook:
             reader = csv.reader(fh)
             results = {}
             n = 1
-            for row in enumerate(reader):
+            for row in reader:
                 row_string = ",".join(row[:-2]).casefold()
                 if row_string.find(phrase.casefold()) >= 0:
-                    results[n] = (dict(zip(self.field_names, row)))
+                    results[n] = dict(zip(self.field_names, row))
                     n+=1
-            if results:
-                return results
-            else:
-                return "Contact not found"
+        if results:
+            return results
+        else:
+            return "Contact not found"
 
     def show_all_contacts(self):
         with open('contact_book.csv', newline='') as fh:
@@ -128,3 +130,19 @@ class ContactBook:
                 if start_date < date_start_year or date_end_year <= end_date:
                     result_list.append(row)
         return result_list
+
+    def search_note_by_tags(self,searched_tags:list)->dict[str:str]:
+        with open(self.contact_book_file_path,'r') as fh:
+            list_of_contacts=csv.DictReader(fh,self.field_names)
+        answer_dict=dict()
+        if not isinstance(searched_tags,list):
+            searched_tags=[searched_tags]
+        for contact in list_of_contacts:
+            is_tag_in_notetags=True
+            tags=contact['tags'].split('#')
+            if not tags: continue
+            for tag in searched_tags:
+                if not contact['note'] or tag not in tags:
+                    is_tag_in_notetags=False
+            if is_tag_in_notetags: answer_dict.update({" ".join([contact['name'],contact['last name']]):contact['note']})
+        return answer_dict

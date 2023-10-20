@@ -9,3 +9,4 @@ With our application you can add, modify and delete contacts from your contact b
 Requirements:
 Python 3.6 or newer
 rich library
+pandas library

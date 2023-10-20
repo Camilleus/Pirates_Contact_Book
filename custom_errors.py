@@ -1,3 +1,3 @@
-
-class WrongInputError(ValueError):
-    pass
+class WrongInputError(Exception):
+    def __init__(self, message):
+        self.message = message

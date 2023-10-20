@@ -5,6 +5,7 @@ from rich.table import Table
 
 from contactbook import Contact, ContactBook
 from notes import Note
+from custom_errors import WrongInputError
 
 #------------------------------------------------STYLE CONSTANTS------------------------------------------------#
 
@@ -87,25 +88,48 @@ while True:
 #----------------------------------------------ADDING NEW CONTACT----------------------------------------------#
 
     elif command == "add":
-
         name = console.input(f"Enter [{COMMAND}]name[/]: ")
         last_name = console.input(f"Enter [{COMMAND}]last name[/]: ")
-        phone = str(console.input(f"Enter [{COMMAND}]phone number[/]: "))
 
-        new_contact = Contact(name.capitalize(), last_name.capitalize(), phone)
+        while True:
+            phone = str(console.input(f"Enter [{COMMAND}]phone number[/]: "))
+            try:
+                new_contact = Contact(name.capitalize(), last_name.capitalize(), phone)
+                break
+            except WrongInputError as ce:
+                console.print(f":warning: {ce.message}", style=COMMAND_ERROR)
+
+
 
         console.print(f"The following parameters are optional, if you want to skip them press [{COMMAND}]enter[/] ", style=INFO)
 
-        e_mail = console.input(f"Enter [{COMMAND}]e-mail[/] [{TABLE}](optional)[/]: ")
-        new_contact.email = e_mail
+        while True:
+            e_mail = console.input(f"Enter [{COMMAND}]e-mail[/] [{TABLE}](optional)[/]: ")
+            if e_mail == "":
+                break
+            else:
+                try:
+                    new_contact.email = e_mail
+                    break
+                except WrongInputError as ce:
+                    console.print(f":warning: {ce.message}", style=COMMAND_ERROR)
 
-        date_of_birth = console.input(f"Enter [{COMMAND}]date of birth <DD.MM.YYYY>[/] [{TABLE}](optional)[/]: ")
-        new_contact.date_of_birth = date_of_birth
+        while True:
+            date_of_birth = console.input(f"Enter [{COMMAND}]date of birth <DD.MM.YYYY>[/] [{TABLE}](optional)[/]: ")
+            if date_of_birth == "":
+                break
+            else:
+                try:
+                    new_contact.date_of_birth = date_of_birth
+                    break
+                except WrongInputError as ce:
+                    console.print(f":warning: {ce.message}", style=COMMAND_ERROR)
 
         address = console.input(f"Enter [{COMMAND}]address[/] [{TABLE}](optional)[/]: ")
         new_contact.address = address
 
         note = console.input(f"Enter [{COMMAND}]note[/] [{TABLE}](optional)[/]: ")
+
 
         if note:
             while True:
@@ -120,7 +144,7 @@ while True:
                         console.print(f"The note has been added and tagged by: {tags} ")
                         break
                     except:
-                        console.print(":warning: Something went wrong with notes. Try again.", style=COMMAND_ERROR)
+                        console.print(":warning: Something went wrong with adding notes. Try again.", style=COMMAND_ERROR)
 
                     finally:
                         console.rule(style=RULER)
@@ -140,7 +164,7 @@ while True:
             console.print(grid)
 
         except:
-            console.print(":warning: Something went wrong with contact. Try again.", style = COMMAND_ERROR)
+            console.print(":warning: Something went wrong with adding contact. Try again.", style = COMMAND_ERROR)
 
         finally:
             console.rule(style = RULER)
@@ -317,4 +341,3 @@ while True:
     else:
         console.print(f":warning: Incorrect command. To see the list of commands enter [{COMMAND}]'h'[/]", style = COMMAND_ERROR)
         console.rule(style=RULER)
-

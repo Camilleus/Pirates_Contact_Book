@@ -3,25 +3,18 @@ import re
 from datetime import date, datetime, timedelta
 from custom_errors import WrongInputError
 import pandas as pd
+import os.path
 
 
 class Contact:
-    def __init__(self, name, last_name, address, phone, email, date_of_birth):
-        self.name = name   # Ew. ograniczenie ilości znaków
-        self.last_name = last_name  # Ew. ograniczenie ilości znaków
-        self.address = address  # Ew. ograniczenie ilości znaków
-        self.phone = phone  # Sprawdzanie poprawności wprowadzonego numeru telefonu
-        self.email = email  # Sprawdzanie poprawności wprowadzonego email
-        # Sprawdzanie poprawności formatu wprowadzonej daty urodzin
+    def __init__(self, name, last_name, phone, email=None, date_of_birth=None, address=None, note=None):
+        self.name = name
+        self.last_name = last_name
+        self.address = address
+        self.phone = phone
+        self.email = email
         self.date_of_birth = date_of_birth
-        self.contact = {
-            "name": self.name,
-            "last name": self.last_name,
-            "address": self.address,
-            "phone": self.phone,
-            "email": self.email,
-            "date_of_birth": self.date_of_birth
-        }
+        self.note = note
 
     @property
     def phone(self):
@@ -29,6 +22,7 @@ class Contact:
 
     @phone.setter
     def phone(self, new_phone: str) -> None:
+        if not new_phone: return
         pattern = re.compile("(?:\+\d{1,3} ?)?(?:\d[- ]?){8}\d")
         if not pattern.fullmatch(new_phone):
             raise WrongInputError(f"Incorrect phone number: {new_phone}")
@@ -43,6 +37,7 @@ class Contact:
 
     @email.setter
     def email(self, new_email: str) -> None:
+        if not new_email: return
         pattern = re.compile("[a-zA-Z][\w.-]+@\w+\.\w{2,}")
         if not pattern.fullmatch(new_email):
             raise WrongInputError(f"Incorrect email: {new_email}")
@@ -56,6 +51,7 @@ class Contact:
     @date_of_birth.setter
     # date expected to be in dd.mm.yyyy format
     def date_of_birth(self, new_date_of_birth: str) -> None:
+        if not new_date_of_birth: return
         pattern = re.compile("\d{2}\.\d{2}\.\d{4}")
         if not pattern.fullmatch(new_date_of_birth):
             raise WrongInputError(
@@ -74,16 +70,22 @@ class Contact:
 
 
 class ContactBook:
-    def add_contact(self):
-        with open("contact_book.csv", "a", newline="") as fh:
-            field_names = ["name", "last name", "address",
-                           "phone", "email", "date_of_birth"]
-            writer = csv.DictWriter(fh, fieldnames=field_names)
-            writer.writeheader()
-            writer.writerow()  # Instancja klasy Contact w formie słownika
+    def __init__(self, contact_book_file_path="contact_book.csv"):
+        self.contact_book_file_path = contact_book_file_path
 
-    def edit_contact(self):
-        pass
+        self.field_names = ["name", "last_name", "_phone", "_email", "_date_of_birth", "address", "note", "tags"]
+
+
+        if not os.path.isfile(self.contact_book_file_path):
+            with open(self.contact_book_file_path, 'w', newline='') as fh:
+                writer = csv.DictWriter(fh, fieldnames=self.field_names)
+                writer.writeheader()
+    def add_contact(self, contact):
+        contact = contact.__dict__
+        contact['note'] = contact['note'].note_contents
+        with open(self.contact_book_file_path, "a", newline="") as fh:
+            writer = csv.DictWriter(fh, fieldnames=self.field_names)
+            writer.writerow(contact)
 
     def remove_contact(self, name, last_name):
         df = pd.read_csv('contact_book.csv')
@@ -91,20 +93,39 @@ class ContactBook:
             df['last name'] == last_name)].index
         df.drop(indexDelete, inplace=True)
         df.to_csv('contact_book.csv')
-
-    def search(self):
+        
+    def edit_contact(self, info):
         pass
+
+    def remove_contact(self, id):
+        pass
+
+    def search_contact(self, phrase):
+        with open(self.contact_book_file_path, "r", newline="") as fh:
+            reader = csv.reader(fh)
+            results = []
+            for row in reader:
+                row_string = ",".join(row[:-2]).casefold()
+                if row_string.find(phrase.casefold()) >= 0:
+                    results.append(dict(zip(self.field_names, row)))
+        if results:
+            if results[0]=={'name': 'name', 'last_name': 'last_name', '_phone': '_phone', '_email': '_email', '_date_of_birth': '_date_of_birth', 'address': 'address', 'note': 'note', 'tags': 'tags'}:
+                return results[1:]
+            return results
+        else:
+            return "Contact not found"
 
     def show_all_contacts(self):
         with open('contact_book.csv', newline='') as fh:
+            list_of_contacts = []
             reader = csv.DictReader(fh)
-            result_list = []
             for row in reader:
-                result_list.append(row)
-            return result_list
+                list_of_contacts.append(row)
+            return list_of_contacts
 
-    def birthdays_in_dyas_range(self, days_range):
+    def birthdays_in_days_range(self, days_range):
         start_date = datetime.now()
+
         end_date = datetime.now() + timedelta(days=days_range)
         init_list = []
         with open('contact_book.csv', newline='') as fh:
@@ -113,10 +134,12 @@ class ContactBook:
                 if row["date_of_birth"]:
                     date_obj = datetime.strptime(
                         row["date_of_birth"], '%Y-%m-%d')
+
                     date_start_year = datetime(year=start_date.year,
                                                month=date_obj.month, day=date_obj.day)
                     date_end_year = datetime(year=end_date.year,
                                              month=date_obj.month, day=date_obj.day)
+
                     if start_date < date_start_year <= end_date or start_date < date_end_year <= end_date:
                         init_list.append(row)
                 else:

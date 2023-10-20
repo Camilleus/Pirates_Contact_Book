@@ -2,6 +2,7 @@ import csv
 import re
 from datetime import date, datetime, timedelta
 from custom_errors import WrongInputError
+import pandas as pd
 import os.path
 
 
@@ -86,6 +87,13 @@ class ContactBook:
             writer = csv.DictWriter(fh, fieldnames=self.field_names)
             writer.writerow(contact)
 
+    def remove_contact(self, name, last_name):
+        df = pd.read_csv('contact_book.csv')
+        indexDelete = df[(df['name'] == name) & (
+            df['last name'] == last_name)].index
+        df.drop(indexDelete, inplace=True)
+        df.to_csv('contact_book.csv')
+        
     def edit_contact(self, info):
         pass
 
@@ -117,34 +125,46 @@ class ContactBook:
 
     def birthdays_in_days_range(self, days_range):
         start_date = datetime.now()
-        end_date = datetime.now() + timedelta(days=int(days_range))
-        result_list = []
+
+        end_date = datetime.now() + timedelta(days=days_range)
+        init_list = []
         with open('contact_book.csv', newline='') as fh:
             reader = csv.DictReader(fh)
             for row in reader:
-                if row["_date_of_birth"] !="":
+                if row["date_of_birth"]:
                     date_obj = datetime.strptime(
-                        row["_date_of_birth"], '%Y-%m-%d')
+                        row["date_of_birth"], '%Y-%m-%d')
+
                     date_start_year = datetime(year=start_date.year,
                                                month=date_obj.month, day=date_obj.day)
                     date_end_year = datetime(year=end_date.year,
                                              month=date_obj.month, day=date_obj.day)
-                    if start_date < date_start_year or date_end_year <= end_date:
-                        result_list.append(row)
-        return result_list
 
-    def search_note_by_tags(self,searched_tags:list)->dict[str:str]:
-        with open(self.contact_book_file_path,'r') as fh:
-            list_of_contacts=csv.DictReader(fh,self.field_names)
-        answer_dict=dict()
-        if not isinstance(searched_tags,list):
-            searched_tags=[searched_tags]
-        for contact in list_of_contacts:
-            is_tag_in_notetags=True
-            tags=contact['tags'].split('#')
-            if not tags: continue
-            for tag in searched_tags:
-                if not contact['note'] or tag not in tags:
-                    is_tag_in_notetags=False
-            if is_tag_in_notetags: answer_dict.update({" ".join([contact['name'],contact['last name']]):contact['note']})
-        return answer_dict
+                    if start_date < date_start_year <= end_date or start_date < date_end_year <= end_date:
+                        init_list.append(row)
+                else:
+                    pass
+            if init_list:
+                list_sorted = sorted(
+                    init_list, key=lambda row: row["date_of_birth"][5:])
+                final_list = []
+                for element in list_sorted:
+                    date_obj = datetime.strptime(
+                        element["date_of_birth"], '%Y-%m-%d')
+                    date_to_check = datetime(year=start_date.year,
+                                             month=date_obj.month, day=date_obj.day)
+                    if date_to_check < start_date:
+                        date_to_cal = datetime(
+                            year=start_date.year+1, month=date_obj.month, day=date_obj.day)
+                        delta = date_to_cal - start_date
+                        element['to_birthday'] = str(delta.days)
+                        final_list.append(element)
+                    else:
+                        date_to_cal = datetime(
+                            year=start_date.year, month=date_obj.month, day=date_obj.day)
+                        delta = date_to_cal - start_date
+                        element['to_birthday'] = str(delta.days)
+                        final_list.append(element)
+                return final_list
+            else:
+                return 'No one has a birthday in the given range of days'

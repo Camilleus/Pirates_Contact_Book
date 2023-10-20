@@ -83,10 +83,9 @@ class ContactBook:
         new_contact = [new_contact.__dict__]
         for contact in new_contact:
             if contact["note"]:
-                contact["tags"] = ''.join(contact["note"].tags)
+                contact["tags"] = ' '.join(contact["note"].tags)
                 contact["note"] = contact["note"].note_contents
-        df = pandas.DataFrame(new_contact, columns=self.field_names)
-        df.index=[df.index[-1]+1]
+        df = pandas.DataFrame(new_contact, columns=self.field_names,index=[self.new_id()])
         df.to_csv(self.contact_book_file_path, mode="a", index=True, header=False)
 
     def edit_contact(self, no_contact, data_modified, something):
@@ -166,19 +165,22 @@ class ContactBook:
                 return 'No one has a birthday in the given range of days'
 
     def search_note_by_tags(self,searched_tags)->dict[str:str]:
+        if isinstance(searched_tags,list) and searched_tags[0].strip().startswith('#'):
+            searched_tags=''.join(searched_tags)
         if isinstance(searched_tags,str):
             searched_tags=searched_tags.split('#')[1:]
-        answer_dict=dict()
+        answer_dict=list()
         with open(self.contact_book_file_path,'r') as fh:
-            list_of_contacts=csv.DictReader(fh,[' ']+self.field_names)
+            list_of_contacts=csv.DictReader(fh,['id']+self.field_names)
             for contact in list_of_contacts:
                 is_tag_in_notetags=True
                 if not contact['tags']: continue
                 tags=contact['tags'].split('#')[1:]
+                tags[:]=map(lambda tag: tag.strip(),tags)
                 for tag in searched_tags:
                     if not contact['note'] or tag not in tags:
                         is_tag_in_notetags=False
-                if is_tag_in_notetags: answer_dict.update({" ".join([contact['name'],contact['last_name']]):contact['note']})
+                if is_tag_in_notetags: answer_dict.append(contact)
         return answer_dict
         
     def search_contacts_with_notes(self):
@@ -193,4 +195,10 @@ class ContactBook:
             return results
         else:
             return "Contact not found"
-   
+    
+    def new_id(self):
+        with open(self.contact_book_file_path, "r") as fh:
+            reader=csv.DictReader(fh,['id']+self.field_names)
+            next(reader)
+            max_id=max(int(contact['id']) for contact in reader)
+        return max_id+1

@@ -72,7 +72,7 @@ class ContactBook:
     def __init__(self, contact_book_file_path="contact_book.csv"):
         self.contact_book_file_path = contact_book_file_path
 
-        self.field_names = ["id","name", "last_name", "_phone", "_email", "_date_of_birth", "address", "note", "tags"]
+        self.field_names = ["name", "last_name", "_phone", "_email", "_date_of_birth", "address", "note", "tags"]
 
         if not os.path.isfile(self.contact_book_file_path):
             df = pandas.DataFrame(columns=self.field_names)
@@ -82,12 +82,14 @@ class ContactBook:
         #     with open(self.contact_book_file_path, 'w', newline='') as fh:
         #         writer = csv.DictWriter(fh, fieldnames=self.field_names)
         #         writer.writeheader()
+
     def add_contact(self, new_contact):
         new_contact = [new_contact.__dict__]
         for contact in new_contact:
             if contact["note"]:
                 contact["note"] = contact["note"].note_contents
         df = pandas.DataFrame(new_contact, columns=self.field_names)
+        df.index=[df.index[-1]+1]
         df.to_csv(self.contact_book_file_path, mode="a", index=True, header=False)
 
     def edit_contact(self, no_contact, data_modified, something):
@@ -106,7 +108,7 @@ class ContactBook:
             for row in reader:
                 row_string = ",".join(row[:-2]).casefold()
                 if row_string.find(phrase.casefold()) >= 0:
-                    results.append(dict(zip(self.field_names, row)))
+                    results.append(dict(zip(['id']+self.field_names, row)))
         if results:
             return results
         else:
@@ -143,24 +145,13 @@ class ContactBook:
             searched_tags=searched_tags.split('#')[1:]
         answer_dict=dict()
         with open(self.contact_book_file_path,'r') as fh:
-            list_of_contacts=csv.DictReader(fh,self.field_names)
+            list_of_contacts=csv.DictReader(fh,[' ']+self.field_names)
             for contact in list_of_contacts:
                 is_tag_in_notetags=True
-                tags=contact['tags'].split('#')
-                print(tags)
-                if not tags: continue
+                if not contact['tags']: continue
+                tags=contact['tags'].split('#')[1:]
                 for tag in searched_tags:
                     if not contact['note'] or tag not in tags:
                         is_tag_in_notetags=False
                 if is_tag_in_notetags: answer_dict.update({" ".join([contact['name'],contact['last_name']]):contact['note']})
         return answer_dict
-    
-    def new_id(self)->int:
-        with open(self.contact_book_file_path,'r') as fh:
-            reader=csv.DictReader(fh,self.field_names)
-            next(reader)
-            ids=[int(row['id']) for row in reader]
-        try:
-            return sorted(ids)[-1]+1
-        except IndexError:
-            return 1

@@ -118,7 +118,7 @@ class ContactBook:
                 list_of_contacts.append(row)
             return list_of_contacts
 
-  def search_note_by_tags(self,searched_tags)->dict[str:str]:
+    def search_note_by_tags(self,searched_tags)->dict[str:str]:
             if isinstance(searched_tags,str):
                 searched_tags=searched_tags.split('#')[1:]
             answer_dict=dict()

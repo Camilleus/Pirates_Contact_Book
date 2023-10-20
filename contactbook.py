@@ -117,7 +117,7 @@ class ContactBook:
                 list_of_contacts.append(row)
             return list_of_contacts
 
-    def birthdays_in_days_range(self, days_range):
+def birthdays_in_days_range(self, days_range):
         start_date = datetime.now()
 
         end_date = datetime.now() + timedelta(days=days_range)
@@ -125,9 +125,9 @@ class ContactBook:
         with open('contact_book.csv', newline='') as fh:
             reader = csv.DictReader(fh)
             for row in reader:
-                if row["date_of_birth"]:
+                if row["_date_of_birth"]:
                     date_obj = datetime.strptime(
-                        row["date_of_birth"], '%Y-%m-%d')
+                        row["_date_of_birth"], '%Y-%m-%d')
 
                     date_start_year = datetime(year=start_date.year,
                                                month=date_obj.month, day=date_obj.day)
@@ -140,11 +140,11 @@ class ContactBook:
                     pass
             if init_list:
                 list_sorted = sorted(
-                    init_list, key=lambda row: row["date_of_birth"][5:])
+                    init_list, key=lambda row: row["_date_of_birth"][5:])
                 final_list = []
                 for element in list_sorted:
                     date_obj = datetime.strptime(
-                        element["date_of_birth"], '%Y-%m-%d')
+                        element["_date_of_birth"], '%Y-%m-%d')
                     date_to_check = datetime(year=start_date.year,
                                              month=date_obj.month, day=date_obj.day)
                     if date_to_check < start_date:

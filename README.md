@@ -1,11 +1,26 @@
-Its GoIT project, namely contact book, We're making it real now
+# 5Stars Contact Book
 
-Our Project takes your csv file with your contacts and makes it easier to operate with
-Our application has in-built bot that will help you in your deeds in your contact book
-With our application you will receive reminder with people who have birthday soon
+Hello Everyone! Its GoIT project, namely contact book, We're making it real now
 
-With our application you can add, modify and delete contacts from your contact book
+It's made by ***** squad (five stars squad)
+
+## Installation and Requirements
+
+Installation:
+It's simple, just copy our repository on your computer
 
 Requirements:
 Python 3.6 or newer
 rich library
+pandas library
+
+## Usage
+
+nothing simpler as that, just run bot.py in your virtual environment
+
+## Contributing
+
+Pull requests are welcome. For major changes, please open an issue first
+to discuss what you would like to change.
+
+Please make sure to update tests as appropriate.

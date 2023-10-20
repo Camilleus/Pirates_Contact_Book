@@ -72,7 +72,7 @@ class ContactBook:
     def __init__(self, contact_book_file_path="contact_book.csv"):
         self.contact_book_file_path = contact_book_file_path
 
-        self.field_names = ["name", "last_name", "_phone", "_email", "_date_of_birth", "address", "note", "tags"]
+        self.field_names = ["id","name", "last_name", "_phone", "_email", "_date_of_birth", "address", "note", "tags"]
 
         if not os.path.isfile(self.contact_book_file_path):
             df = pandas.DataFrame(columns=self.field_names)
@@ -153,3 +153,14 @@ class ContactBook:
                     is_tag_in_notetags=False
             if is_tag_in_notetags: answer_dict.update({" ".join([contact['name'],contact['last name']]):contact['note']})
         return answer_dict
+    
+    def new_id(self)->int:
+        with open(self.contact_book_file_path,'r') as fh:
+            reader=csv.DictReader(fh,self.field_names)
+            next(reader)
+            ids=[int(row['id']) for row in reader]
+        try:
+            return sorted(ids)[-1]+1
+        except IndexError:
+            return 1
+    

@@ -138,20 +138,21 @@ class ContactBook:
                         result_list.append(row)
         return result_list
 
-    def search_note_by_tags(self,searched_tags:list)->dict[str:str]:
+    def search_note_by_tags(self,searched_tags)->dict[str:str]:
+        if isinstance(searched_tags,str):
+            searched_tags=searched_tags.split('#')[1:]
+        answer_dict=dict()
         with open(self.contact_book_file_path,'r') as fh:
             list_of_contacts=csv.DictReader(fh,self.field_names)
-        answer_dict=dict()
-        if not isinstance(searched_tags,list):
-            searched_tags=[searched_tags]
-        for contact in list_of_contacts:
-            is_tag_in_notetags=True
-            tags=contact['tags'].split('#')
-            if not tags: continue
-            for tag in searched_tags:
-                if not contact['note'] or tag not in tags:
-                    is_tag_in_notetags=False
-            if is_tag_in_notetags: answer_dict.update({" ".join([contact['name'],contact['last name']]):contact['note']})
+            for contact in list_of_contacts:
+                is_tag_in_notetags=True
+                tags=contact['tags'].split('#')
+                print(tags)
+                if not tags: continue
+                for tag in searched_tags:
+                    if not contact['note'] or tag not in tags:
+                        is_tag_in_notetags=False
+                if is_tag_in_notetags: answer_dict.update({" ".join([contact['name'],contact['last_name']]):contact['note']})
         return answer_dict
     
     def new_id(self)->int:
@@ -163,4 +164,3 @@ class ContactBook:
             return sorted(ids)[-1]+1
         except IndexError:
             return 1
-    

@@ -88,12 +88,28 @@ class ContactBook:
         df = pandas.DataFrame(new_contact, columns=self.field_names,index=[self.new_id()])
         df.to_csv(self.contact_book_file_path, mode="a", index=True, header=False)
 
-    def edit_contact(self, no_contact, data_modified, something):
-        reader = pandas.read_csv(self.contact_book_file_path)
-        reader.loc["id_contact", data_modified] = something
-        reader.to_csv((self.contact_book_file_path))
+    def show_all_contacts(self):
+        with open('contact_book.csv', newline='') as fh:
+            list_of_contacts = []
+            reader = csv.DictReader(fh)
+            for row in reader:
+                list_of_contacts.append(row)
+            return list_of_contacts
 
-    def remove_contact(self, no_contact):
+
+    # THAT'S MY PROPOSITION :) - OKTAWIAN
+
+    def edit_contact(self, id_to_remove, new_contact):
+        self.add_contact(new_contact)
+        self.remove_contact(id_to_remove)
+
+
+        # reader = pandas.read_csv(self.contact_book_file_path)
+        # reader.loc["id_contact", data_modified] = something
+        # reader.to_csv((self.contact_book_file_path))
+
+
+    def remove_contact(self, id_to_remove):
         pass
 
     def search_contact(self, phrase):
@@ -109,14 +125,6 @@ class ContactBook:
             return results
         else:
             return "Contact not found"
-
-    def show_all_contacts(self):
-        with open('contact_book.csv', newline='') as fh:
-            list_of_contacts = []
-            reader = csv.DictReader(fh)
-            for row in reader:
-                list_of_contacts.append(row)
-            return list_of_contacts
 
     def birthdays_in_days_range(self, days_range):
         start_date = datetime.now()
@@ -195,7 +203,7 @@ class ContactBook:
             return results
         else:
             return "Contact not found"
-    
+
     def new_id(self):
         with open(self.contact_book_file_path, "r") as fh:
             reader=csv.DictReader(fh,['id']+self.field_names)

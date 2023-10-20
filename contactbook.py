@@ -4,7 +4,7 @@ from datetime import date, datetime, timedelta
 from custom_errors import WrongInputError
 import pandas as pd
 import os.path
-
+import pandas
 
 class Contact:
     def __init__(self, name, last_name, phone, email=None, date_of_birth=None, address=None, note=None):
@@ -73,44 +73,38 @@ class ContactBook:
     def __init__(self, contact_book_file_path="contact_book.csv"):
         self.contact_book_file_path = contact_book_file_path
 
-        self.field_names = ["name", "last_name", "_phone", "_email", "_date_of_birth", "address", "note", "tags"]
-
+        self.field_names = ["id","name", "last_name", "_phone", "_email", "_date_of_birth", "address", "note", "tags"]
 
         if not os.path.isfile(self.contact_book_file_path):
-            with open(self.contact_book_file_path, 'w', newline='') as fh:
-                writer = csv.DictWriter(fh, fieldnames=self.field_names)
-                writer.writeheader()
-    def add_contact(self, contact):
-        contact = contact.__dict__
-        contact['note'] = contact['note'].note_contents
-        with open(self.contact_book_file_path, "a", newline="") as fh:
-            writer = csv.DictWriter(fh, fieldnames=self.field_names)
-            writer.writerow(contact)
+            df = pandas.DataFrame(columns=self.field_names)
+            df.to_csv(self.contact_book_file_path)
 
-    def remove_contact(self, name, last_name):
-        df = pd.read_csv('contact_book.csv')
-        indexDelete = df[(df['name'] == name) & (
-            df['last name'] == last_name)].index
-        df.drop(indexDelete, inplace=True)
-        df.to_csv('contact_book.csv')
-        
-    def edit_contact(self, info):
-        pass
+    def add_contact(self, new_contact):
+        new_contact = [new_contact.__dict__]
+        for contact in new_contact:
+            if contact["note"]:
+                contact["note"] = contact["note"].note_contents
+        df = pandas.DataFrame(new_contact, columns=self.field_names)
+        df.to_csv(self.contact_book_file_path, mode="a", index=True, header=False)
 
-    def remove_contact(self, id):
+    def edit_contact(self, no_contact, data_modified, something):
+        reader = pandas.read_csv(self.contact_book_file_path)
+        reader.loc["id_contact", data_modified] = something
+        reader.to_csv((self.contact_book_file_path))
+
+    def remove_contact(self, no_contact):
         pass
 
     def search_contact(self, phrase):
         with open(self.contact_book_file_path, "r", newline="") as fh:
             reader = csv.reader(fh)
             results = []
+            next(reader)
             for row in reader:
                 row_string = ",".join(row[:-2]).casefold()
                 if row_string.find(phrase.casefold()) >= 0:
                     results.append(dict(zip(self.field_names, row)))
         if results:
-            if results[0]=={'name': 'name', 'last_name': 'last_name', '_phone': '_phone', '_email': '_email', '_date_of_birth': '_date_of_birth', 'address': 'address', 'note': 'note', 'tags': 'tags'}:
-                return results[1:]
             return results
         else:
             return "Contact not found"

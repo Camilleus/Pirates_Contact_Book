@@ -117,6 +117,22 @@ class ContactBook:
                 list_of_contacts.append(row)
             return list_of_contacts
 
+    def search_note_by_tags(self,searched_tags)->dict[str:str]:
+            if isinstance(searched_tags,str):
+                searched_tags=searched_tags.split('#')[1:]
+            answer_dict=dict()
+            with open(self.contact_book_file_path,'r') as fh:
+                list_of_contacts=csv.DictReader(fh,self.field_names)
+                for contact in list_of_contacts:
+                    is_tag_in_notetags=True
+                    tags=contact['tags'].split('#')
+                    if not tags: continue
+                    for tag in searched_tags:
+                        if not contact['note'] or tag not in tags:
+                            is_tag_in_notetags=False
+                    if is_tag_in_notetags: answer_dict.update({" ".join([contact['name'],contact['last_name']]):contact['note']})
+            return answer_dict
+
 def birthdays_in_days_range(self, days_range):
         start_date = datetime.now()
 

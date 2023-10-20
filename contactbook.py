@@ -83,6 +83,7 @@ class ContactBook:
         new_contact = [new_contact.__dict__]
         for contact in new_contact:
             if contact["note"]:
+                contact["tags"] = ''.join(contact["note"].tags)
                 contact["note"] = contact["note"].note_contents
         df = pandas.DataFrame(new_contact, columns=self.field_names)
         df.index=[df.index[-1]+1]

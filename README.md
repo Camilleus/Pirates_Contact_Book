@@ -4,19 +4,27 @@ Hello Everyone! Its GoIT project, namely contact book, We're making it real now
 
 It's made by ***** squad (five stars squad)
 
-## Installation and Requirements
+## Installation 
 
 Installation:
-It's simple, just copy our repository on your computer
+It's simple, just install our app with command 
 
-Requirements:
+```pip install 5-Stars-Contact-Book==0.0.1```
+
+(À propos, write it in terminal ;D)
+
+## Requirements:
+
 Python 3.6 or newer
+
 rich library
+
 pandas library
 
 ## Usage
 
 nothing simpler as that, just run main.py in your virtual environment
+or run main.py in cmd 
 
 ## Contributing
 

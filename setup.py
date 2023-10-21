@@ -13,12 +13,12 @@ setup(
     license='MIT',
     packages=find_packages(),
     install_requires=[],
-    keywords='contact','book',
-    classifiers= [
+    keywords=['contact', 'book'],
+    classifiers=[
         "Development Status :: 3 - Alpha",
-        "Intended Audience :: People who know how to use terminal/console",
+        "Intended Audience :: Developers",
         'License :: OSI Approved :: MIT License',
-        'Topic :: phone,contacts',
+        'Topic :: Communications :: Telephony',
         "Programming Language :: Python :: 3",
     ]
 )

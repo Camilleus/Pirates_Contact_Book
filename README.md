@@ -16,7 +16,7 @@ pandas library
 
 ## Usage
 
-nothing simpler as that, just run bot.py in your virtual environment
+nothing simpler as that, just run main.py in your virtual environment
 
 ## Contributing
 

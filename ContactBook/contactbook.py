@@ -177,7 +177,7 @@ class ContactBook:
             searched_tags=''.join(searched_tags)
         if isinstance(searched_tags,str):
             searched_tags=searched_tags.split('#')[1:]
-        answer_dict=list()
+        answer_list=list()
         with open(self.contact_book_file_path,'r') as fh:
             list_of_contacts=csv.DictReader(fh,['id']+self.field_names)
             for contact in list_of_contacts:
@@ -188,8 +188,8 @@ class ContactBook:
                 for tag in searched_tags:
                     if not contact['note'] or tag not in tags:
                         is_tag_in_notetags=False
-                if is_tag_in_notetags: answer_dict.append(contact)
-        return answer_dict
+                if is_tag_in_notetags: answer_list.append(contact)
+        return answer_list
         
     def search_contacts_with_notes(self):
         with open(self.contact_book_file_path, "r", newline="") as fh:
@@ -208,7 +208,8 @@ class ContactBook:
         with open(self.contact_book_file_path, "r") as fh:
             reader=csv.DictReader(fh,['id']+self.field_names)
             next(reader)
-            max_id=max(int(contact['id']) for contact in reader)
+            try: max_id=max(int(contact['id']) for contact in reader)
+            except ValueError: return 0
         return max_id+1
 
     def remove_or_edit_data(self,contact_id:int,data_to_remove:str='note',replace_value:str=None)->None:

@@ -215,5 +215,5 @@ class ContactBook:
         data_file=pandas.read_csv(self.contact_book_file_path,index_col=0)
         if max(data_file.index)<contact_id: raise WrongInputError("There is no contact with that index")
         if data_to_remove not in data_file.columns: raise WrongInputError("There is no column with that name")
-        data_file.loc[contact_id,data_to_remove]=replace_value
+        if data_to_remove=='note' and replace_value==None:  data_file.loc[contact_id,'tags']=None
         data_file.to_csv(self.contact_book_file_path)

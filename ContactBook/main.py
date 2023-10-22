@@ -1,4 +1,3 @@
-from contactbook import Contact, ContactBook
 from bot import bot_contact_book
 
 if __name__ == "__main__":

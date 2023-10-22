@@ -92,39 +92,57 @@ def print_all_contacts():
 #-------------------------------------------------ADDING NEW CONTACT-------------------------------------------------#
 
 def add_new_contact():
-    name = console.input(f"Enter [{COMMAND}]name[/]: ")
-    last_name = console.input(f"Enter [{COMMAND}]last name[/]: ")
 
-    while True:
+
+    name_is_empty = True
+    while name_is_empty:
+        name = console.input(f"Enter [{COMMAND}]name[/]: ")
+        if len(name) >= 2 and name.isalpha():
+            name_is_empty = False
+        else:
+            console.print(f":warning: Name has to have at least 2 letters", style=COMMAND_ERROR)
+
+    last_name_is_empty = True
+    while last_name_is_empty:
+        last_name = console.input(f"Enter [{COMMAND}]last name[/]: ")
+        if len(last_name) >= 2 and last_name.isalpha():
+            last_name_is_empty = False
+        else:
+            console.print(f":warning: Last name has to have at least 2 letters", style=COMMAND_ERROR)
+
+    phone_is_valid = False
+    while not phone_is_valid:
         phone = str(console.input(f"Enter [{COMMAND}]phone number[/]: "))
         try:
             new_contact = Contact(name.capitalize(), last_name.capitalize(), phone)
-            break
+            phone_is_valid = True
         except WrongInputError as ce:
             console.print(f":warning: {ce.message}", style=COMMAND_ERROR)
 
     console.print(f"The following parameters are optional, if you want to skip them press [{COMMAND}]enter[/]",
                   style=INFO)
 
-    while True:
+    email_is_valid_or_empty = False
+    while not email_is_valid_or_empty:
         e_mail = console.input(f"Enter [{COMMAND}]e-mail[/] [{TABLE}](optional)[/]: ")
         if e_mail == "":
-            break
+            email_is_valid_or_empty = True
         else:
             try:
                 new_contact.email = e_mail
-                break
+                email_is_valid_or_empty = True
             except WrongInputError as ce:
                 console.print(f":warning: {ce.message}", style=COMMAND_ERROR)
 
-    while True:
+    date_is_valid_or_empty = False
+    while not date_is_valid_or_empty:
         date_of_birth = console.input(f"Enter [{COMMAND}]date of birth <DD.MM.YYYY>[/] [{TABLE}](optional)[/]: ")
         if date_of_birth == "":
-            break
+            date_is_valid_or_empty = True
         else:
             try:
                 new_contact.date_of_birth = date_of_birth
-                break
+                date_is_valid_or_empty = True
             except WrongInputError as ce:
                 console.print(f":warning: {ce.message}", style=COMMAND_ERROR)
 
@@ -221,68 +239,8 @@ def search_contacts_by_phrase(phrase):
         while True:
             option = console.input(f"Enter [{COMMAND}]command[/] according to contact: ").casefold()
 
-            # ------------------------------------EDITING CONTACT------------------------------------#
-
             if option.startswith("edit"):
-                new_contact_data = {}
-                try:
-                    contact_to_edit = int(option.replace("edit", "").strip()) - 1
-                    if 0 <= contact_to_edit <= no_of_contacts:
-                        id_to_edit = int(searched_contacts[contact_to_edit].get('id'))
-
-                        for field in searched_contacts[contact_to_edit]:
-                            if field != "id":
-                                console.print("")
-                                console.print(
-                                    f"Actual value for {field} is: [{COMMAND}]{searched_contacts[contact_to_edit].get(field)}[/]",
-                                    style=INFO)
-                                console.print(f"To leave it as it is - press [{COMMAND}]Enter[/]", style=TABLE)
-                                console.print(
-                                    f"To delete this value - type-in [{COMMAND}]'del'[/] and press [{COMMAND}]Enter[/]",
-                                    style=TABLE)
-                                console.print(f"To insert new value - enter new value and press [{COMMAND}]Enter[/]",
-                                              style=TABLE)
-                                console.rule(style=RULER)
-                                console.print("")
-                                new_data = console.input(
-                                    f"Enter [{COMMAND}]data/command[/] according to above instructions: ")
-
-                                if not new_data:
-                                    new_contact_data[field] = searched_contacts[contact_to_edit].get(field)
-                                    console.print(f"The existing value: {new_contact_data[field]} has been left",
-                                                  style=INFO)
-                                    console.rule(style=RULER)
-                                elif new_data == "del":
-                                    new_contact_data[field] = ""
-                                    console.print(f"The value has been deleted", style=INFO)
-                                    console.rule(style=RULER)
-                                else:
-                                    new_contact_data[field] = new_data
-                                    console.print(f"The value has been changed to: {new_contact_data[field]}",
-                                                  style=INFO)
-                                    console.rule(style=RULER)
-
-                        new_note = Note(new_contact_data.get('note'), new_contact_data.get('tags'))
-                        new_contact = Contact(new_contact_data.get('name'), new_contact_data.get('last_name'),
-                                              new_contact_data.get('phone'), new_contact_data.get('email'),
-                                              new_contact_data.get('date_of_birth'), new_contact_data.get('address'),
-                                              new_note)
-                        contact_book.edit_contact(id_to_edit, new_contact)
-
-                        grid = create_grid("Contact has been edited.")
-                        console.print(grid)
-
-                except IndexError:
-                    console.print(":warning: Index out of range. Try again.", style=COMMAND_ERROR)
-
-                except ValueError:
-                    console.print(":warning: You have to enter valid number of a contact to edit. Try again.",
-                                  style=COMMAND_ERROR)
-
-                finally:
-                    console.rule(style=RULER)
-
-            # ------------------------------------DELETING CONTACT------------------------------------#
+                edit_contact(option, no_of_contacts, searched_contacts)
 
             elif option.startswith("delete"):
                 delete_contact(option, no_of_contacts, searched_contacts)
@@ -297,7 +255,7 @@ def search_contacts_by_phrase(phrase):
 
 
 # ----------------------------------------SEARCHING FOR CONTACTS WITH B-DAYS-----------------------------------------#
-def search_contacts_with_birthday(no_of_days):
+def search_contacts_with_birthdays(no_of_days):
 
     table = Table(title=f"List of your contacts who have birthday in coming {no_of_days} days", expand=True,
                   title_style=TITLE, header_style=HEADER, border_style=TABLE, title_justify="center",
@@ -394,8 +352,6 @@ def search_notes_by_tags(tags):
         while True:
             option = console.input(f"Enter [{COMMAND}]command[/] according to notes: ").casefold()
 
-            # ------------------------------------DELETING NOTE------------------------------------#
-
             if option.startswith("delete"):
                 delete_note(option, no_of_notes, list_of_notes)
 
@@ -415,6 +371,155 @@ def search_notes_by_tags(tags):
 #----------------------------------------------------SUB-FUNCTIONS---------------------------------------------------#
 #--------------------------------------------------------------------------------------------------------------------#
 
+# --------------------------------------------------EDITING CONTACT--------------------------------------------------#
+
+def edit_contact(option, no_of_contacts, searched_contacts):
+
+    try:
+        contact_to_edit = int(option.replace("edit", "").strip()) - 1
+        if 0 <= contact_to_edit <= no_of_contacts:
+            id_to_edit = int(searched_contacts[contact_to_edit].get('id'))
+
+            name_is_empty = True
+            while name_is_empty:
+
+                name = edit_field('name', searched_contacts, contact_to_edit, mandatory=True)
+                if len(name) >= 2 and name.isalpha():
+                    name_is_empty = False
+                else:
+                    console.print(f":warning: Name has to have at least 2 letters", style=COMMAND_ERROR)
+
+            last_name_is_empty = True
+            while last_name_is_empty:
+                last_name = edit_field('last_name', searched_contacts, contact_to_edit, mandatory=True)
+                if len(last_name) >= 2 and last_name.isalpha():
+                    last_name_is_empty = False
+                else:
+                    console.print(f":warning: Last name has to have at least 2 letters", style=COMMAND_ERROR)
+
+            phone_is_valid = False
+            while not phone_is_valid:
+                phone = str(edit_field('_phone', searched_contacts, contact_to_edit, mandatory=True))
+                try:
+                    new_contact = Contact(name.capitalize(), last_name.capitalize(), phone)
+                    phone_is_valid = True
+                except WrongInputError as ce:
+                    console.print(f":warning: {ce.message}", style=COMMAND_ERROR)
+
+            email_is_valid_or_empty = False
+            while not email_is_valid_or_empty:
+                e_mail = edit_field('_email', searched_contacts, contact_to_edit, mandatory=False)
+                if e_mail == "":
+                    email_is_valid_or_empty = True
+                else:
+                    try:
+                        new_contact.email = e_mail
+                        email_is_valid_or_empty = True
+                    except WrongInputError as ce:
+                        console.print(f":warning: {ce.message}", style=COMMAND_ERROR)
+
+            date_is_valid_or_empty = False
+            while not date_is_valid_or_empty:
+                date_of_birth = edit_field('_date_of_birth', searched_contacts, contact_to_edit, mandatory=False)
+                date_of_birth = date_of_birth.split("-")
+                date_of_birth.reverse()
+                date_of_birth = ".".join(date_of_birth)
+                console.print(date_of_birth)
+
+                if date_of_birth == "":
+                    date_is_valid_or_empty = True
+                else:
+                    try:
+                        new_contact.date_of_birth = date_of_birth
+                        date_is_valid_or_empty = True
+                    except WrongInputError as ce:
+                        console.print(f":warning: {ce.message}", style=COMMAND_ERROR)
+
+            address = edit_field('address', searched_contacts, contact_to_edit, mandatory=False)
+            new_contact.address = address
+
+            note = edit_field('note', searched_contacts, contact_to_edit, mandatory=False)
+            note = note.replace(",", "_")
+
+            if note:
+                tags = edit_field('tags', searched_contacts, contact_to_edit, mandatory=False)
+            else:
+                tags = ""
+            new_contact.note = Note(note, *tags)
+
+            try:
+                contact_book.edit_contact(id_to_edit, new_contact)
+
+                grid = create_grid("Contact has been successfully edited.")
+                console.print(grid)
+
+            except ValueError:
+                console.print(":warning: Something went wrong with editing your contact. Try again.", style=COMMAND_ERROR)
+
+            finally:
+                console.rule(style=RULER)
+
+    except IndexError:
+        console.print(":warning: Index out of range. Try again.", style=COMMAND_ERROR)
+
+    except ValueError:
+        console.print(":warning: You have to enter valid number of a contact to edit. Try again.",
+                      style=COMMAND_ERROR)
+
+    finally:
+        console.rule(style=RULER)
+
+
+# --------------------------------------------------EDITING FIELD----------------------------------------------------#
+def edit_field(field, searched_contacts, contact_to_edit, mandatory = False):
+
+    valid_value = False
+    while not valid_value:
+
+        console.print(
+            f"\nActual value for {field} is: [{COMMAND}]{searched_contacts[contact_to_edit].get(field)}[/]\n",
+            style=INFO)
+        console.print(f"To leave it as it is - press [{COMMAND}]Enter[/]", style=TABLE)
+        console.print(f"To insert new value - enter new value and press [{COMMAND}]Enter[/]", style=TABLE)
+        if mandatory:
+            console.print(f"You can't delete this value because it is mandatory.", style=TABLE)
+        else:
+            console.print(
+                f"To delete this value - type-in [{COMMAND}]'del'[/] and press [{COMMAND}]Enter[/]",
+                style=TABLE)
+        if field == '_date_of_birth':
+            new_data = console.input(f"Enter [{COMMAND}]date of birth <DD.MM.YYYY>[/] [{TABLE}](optional)[/]: ")
+
+        elif field == 'tags':
+            new_data = console.input(
+                f"Enter tags with # and separate them by comma <[{COMMAND}]#tag1, #tag2, ...[/] >: ").casefold()
+            new_data = [tag.replace(",", "").strip() for tag in new_data.split(",")]
+            console.rule(style=RULER)
+        else:
+            new_data = console.input(
+                f"\nEnter [{COMMAND}]data/command[/] according to above instructions: ")
+            console.rule(style=RULER)
+
+
+        if not new_data:
+            new_data = searched_contacts[contact_to_edit].get(field)
+            console.print(f"\nThe existing value: {new_data} has been left",
+                          style=INFO)
+            console.rule(style=RULER)
+            return new_data
+        elif new_data == "del":
+            if not mandatory:
+                new_data = ""
+                console.print(f"\nThe value has been deleted", style=INFO)
+                console.rule(style=RULER)
+                return new_data
+        else:
+            console.print(f"\nThe value has been changed to: {new_data}",
+                          style=INFO)
+            console.rule(style=RULER)
+            return new_data
+
+
 # -------------------------------------------------DELETING CONTACT--------------------------------------------------#
 def delete_contact(option, no_of_contacts, searched_contacts):
 
@@ -426,7 +531,7 @@ def delete_contact(option, no_of_contacts, searched_contacts):
             contact_to_remove = int(option.replace("delete", "").strip()) - 1
             print(f"No of contact to remove from list: {contact_to_remove}")
             print(f"Total no of contacts on the list list: {no_of_contacts}")
-            if 0 <= contact_to_remove <= no_of_contacts:
+            if 0 <= contact_to_remove <= no_of_contacts - 1:
                 id_to_remove = int(searched_contacts[contact_to_remove].get('id'))
                 print(f"ID of contact to remove from list: {id_to_remove}")
 
@@ -454,7 +559,7 @@ def delete_note(option, no_of_notes, list_of_notes):
     if decision == "y":
         try:
             note_to_delete = int(option.replace("delete", "").strip()) - 1
-            if 0 <= note_to_delete <= no_of_notes:
+            if 0 <= note_to_delete <= no_of_notes - 1:
                 id_of_contact = int(list_of_notes[note_to_delete].get('id'))
                 contact_book.remove_or_edit_data(id_of_contact)
 
@@ -498,7 +603,12 @@ def bot_contact_book():
 
         elif command.startswith("search"):
             phrase = command.replace("search", "").strip()
-            search_contacts_by_phrase(phrase)
+            if phrase:
+                search_contacts_by_phrase(phrase)
+            else:
+                console.print(f":warning: Enter the [{COMMAND}]phrase[/] to search for",
+                              style=COMMAND_ERROR)
+                console.rule(style=RULER)
 
         elif command == "sn":
             search_contacts_with_notes()
@@ -506,7 +616,7 @@ def bot_contact_book():
         elif command.startswith("birthday") :
             no_of_days = command.replace("birthday", "").strip()
             if no_of_days.isdigit():
-                search_contacts_with_birthday(no_of_days)
+                search_contacts_with_birthdays(no_of_days)
 
             else:
                 console.print(f":warning: Incorrect command. To see the list of commands enter '[{COMMAND}]h[/]'", style=COMMAND_ERROR)
@@ -515,9 +625,13 @@ def bot_contact_book():
         elif command.startswith("notes"):
 
             tags = command.replace("notes", "")
-            tags = [tag.strip() for tag in tags.split(",")]
-
-            search_notes_by_tags(tags)
+            if tags:
+                tags = [tag.strip() for tag in tags.split(",")]
+                search_notes_by_tags(tags)
+            else:
+                console.print(f":warning: Enter the [{COMMAND}]tags[/] to search for",
+                              style=COMMAND_ERROR)
+                console.rule(style=RULER)
 
         elif command == "exit":
             exit()

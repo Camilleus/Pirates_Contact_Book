@@ -69,7 +69,7 @@ class Contact:
 
 
 class ContactBook:
-    def __init__(self, contact_book_file_path=__file__.rsplit('\\',1)[0]+"\\"+"contact_book.csv"):
+    def __init__(self, contact_book_file_path="contact_book.csv"):
         self.contact_book_file_path = contact_book_file_path
 
         self.field_names = ["name", "last_name", "_phone", "_email", "_date_of_birth", "address", "note", "tags"]
@@ -95,16 +95,15 @@ class ContactBook:
                 list_of_contacts.append(row)
             return list_of_contacts
 
-
     def edit_contact(self, id_to_remove, new_contact):
         self.add_contact(new_contact)
         self.remove_contact(id_to_remove)
 
-
     def remove_contact(self, id_to_remove):
         data_file = pandas.read_csv(self.contact_book_file_path, index_col=0)
-        data_file.drop(data_file.index[id_to_remove], inplace=True)
+        data_file.drop(id_to_remove, inplace=True)
         data_file.to_csv(self.contact_book_file_path, index=True)
+
 
     def search_contact(self, phrase):
         with open(self.contact_book_file_path, "r", newline="") as fh:

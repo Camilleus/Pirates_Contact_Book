@@ -146,7 +146,7 @@ def bot_contact_book():
                             new_contact.note = Note(note, *tags)
                             console.print(f"The note has been added and tagged by: {tags} ")
                             break
-                        except Exception as e:
+                        except ZeroDivisionError as e:
                             console.print(e)
                             console.print(":warning: Something went wrong with adding notes. Try again.", style=COMMAND_ERROR)
 
@@ -179,12 +179,11 @@ def bot_contact_book():
 
             phrase = command.replace("search", "").strip()
             searched_contacts = contact_book.search_contact(phrase)
-            print(searched_contacts)
 
             if searched_contacts == "Contact not found":
-                console.print(searched_contacts)
+                console.print(searched_contacts, style=INFO)
             else:
-
+                print(searched_contacts)
                 table = Table(title=f"Contacts searched by phrase: {phrase}", expand=True, title_style=TITLE, header_style=HEADER, border_style=TABLE,
                               title_justify="center", caption_justify="center", show_lines=True, min_width=100)
 
@@ -222,13 +221,20 @@ def bot_contact_book():
 
 
                     if option.startswith("edit"):
-                        # IN PROGRESS
-                        # contact_to_remove = option.replace("edit", "").strip()
-                        # id_to_remove =
+                        new_contact_data = {}
+                        contact_to_edit = int(option.replace("delete", "").strip()) - 1
+                        id_to_edit = int(searched_contacts[contact_to_edit].get('id'))
+
+                        for field in searched_contacts[contact_to_edit]:
+                            console.print(f"Actual value for {field} is: [{COMMAND}]{searched_contacts[contact_to_edit].get(field)}[/]", style=INFO)
+                            console.print(f"If you want to leave it as it is - press [{COMMAND}]Enter[/]", style=INFO)
+                            console.print(f"If you want to delete this value - type-in [{COMMAND}]'del'[/]", style=INFO)
+                            console.print(f"If you want to insert new value - enter new value and press [{COMMAND}]Enter[/]", style=INFO)
+                            new_contact_data[field] = console.input("Enter data/ command according to above instructions: ")
 
                         try:
-
-                            # contact_book.edit_contact(id_to_remove, new_contact)
+                            new_contact = Contact(new_contact_data)
+                            contact_book.edit_contact(id_to_edit, new_contact)
 
                             # Add function to editing
 
@@ -244,16 +250,15 @@ def bot_contact_book():
 
 
                     elif option.startswith("delete"):
-                        # IN PROGRESS
-                        # contact_to_remove = option.replace("delete", "").strip()
-                        # id_to_remove =
 
+                        print(searched_contacts)
 
+                        contact_to_remove = int(option.replace("delete", "").strip()) - 1
+                        id_to_remove = int(searched_contacts[contact_to_remove].get('id'))
 
                         try:
-                            # TODO 5: Method "remove_contact" takes no arguments but it has to take: contact_to_delete
-                            # contact_book.remove_contact(contact_to_remove)
-
+                            print(id_to_remove)
+                            # contact_book.remove_contact(id_to_remove)
                             grid = create_grid("Contact has been deleted.")
                             console.print(grid)
 
@@ -293,7 +298,7 @@ def bot_contact_book():
 
                 console.print(table)
             else:
-                console.print(f"Contacts not found", style=INFO)
+                console.print("Contacts not found", style=INFO)
             console.rule(style=RULER)
 
         # ----------------------------------------------BIRTHDAY SEARCHING----------------------------------------------#
@@ -332,54 +337,62 @@ def bot_contact_book():
         elif command.startswith("notes"):
             tags = command.replace("notes", "")
             tags = [tag.strip() for tag in tags.split(",")]
-            console.print(f"printing tags: {tags}")
+
 
             list_of_notes = contact_book.search_note_by_tags(tags)
-            console.print(f"printing list of notes: {list_of_notes}")
+
+            if list_of_notes:
+                print(list_of_notes)
+
+                table = Table(title=f"Notes searched by given tags: {tags}", expand=True, title_style=TITLE, header_style=HEADER,
+                              border_style=TABLE,title_justify="center", caption_justify="center", show_lines=True, min_width=100)
+
+                table.add_column("No", justify="left", style=INFO, no_wrap=True, width=5)
+                table.add_column("Notes", justify="center", style=INFO)
+                table.add_column("Name", justify="center", style=INFO, no_wrap=True, width=15)
+                table.add_column("Last name", justify="center", style=INFO, no_wrap=True, width=15)
+
+                for no, note in enumerate(list_of_notes):
+                    table.add_row(str(no + 1),note["note"], note["name"], note["last_name"])
+
+                console.print(table)
+                console.rule(style=RULER)
 
 
-            table = Table(title=f"Notes searched by given tags: {tags}", expand=True, title_style=TITLE, header_style=HEADER,
-                          border_style=TABLE,title_justify="center", caption_justify="center", show_lines=True, min_width=100)
-
-            table.add_column("No", justify="left", style=INFO, no_wrap=True, width=5)
-            table.add_column("Notes", justify="center", style=INFO)
-            table.add_column("Name", justify="center", style=INFO, no_wrap=True, width=15)
-            table.add_column("Last name", justify="center", style=INFO, no_wrap=True, width=15)
-
-            for no, note in enumerate(list_of_notes):
-                table.add_row(str(no + 1),note["note"], note["name"], note["last_name"])
-
-            console.print(table)
-            console.rule(style=RULER)
+                table = Table(title="Choose what do you want to do with your notes", expand=True, title_style=TITLE, header_style= HEADER,
+                              border_style=TABLE, title_justify="center", caption_justify= "center", show_lines=True, min_width=100)
+                table.add_column("Command", justify="right", style=INFO, no_wrap=True)
+                table.add_column("Description", justify="left", style=INFO, no_wrap=True)
 
 
-            table = Table(title="Choose what do you want to do with your notes", expand=True, title_style=TITLE, header_style= HEADER,
-                          border_style=TABLE, title_justify="center", caption_justify= "center", show_lines=True, min_width=100)
-            table.add_column("Command", justify="right", style=INFO, no_wrap=True)
-            table.add_column("Description", justify="left", style=INFO, no_wrap=True)
+                table.add_row(f"delete <[{COMMAND}]No[/]>", f"Delete the note <[{COMMAND}]No[/]>")
+                table.add_row("exit", "Exit")
+                console.print(table)
+                console.print(f"Notes editing is available by editing contacts -> search for a contact and enter editing mode",
+                              style=INFO)
+                console.rule(style=RULER)
 
 
-            table.add_row(f"delete <[{COMMAND}]No[/]>", f"Delete the note <[{COMMAND}]No[/]>")
-            table.add_row("exit", "Exit")
-            console.print(table)
-            console.print(f"Notes editing is available by editing contacts -> search for a contact and enter editing mode",
-                          style=INFO)
-            console.rule(style=RULER)
+                while True:
+                    option = console.input(f"Enter [{COMMAND}]command[/] according to notes: ").casefold()
 
+                    if option.startswith("delete"):
+                        note_to_delete = int(option.replace("delete", "").strip()) - 1
+                        id_of_contact = int(list_of_notes[note_to_delete].get('id'))
+                        contact_book.remove_or_edit_data(id_of_contact)
 
-            while True:
-                option = console.input(f"Enter [{COMMAND}]command[/] according to notes: ").casefold()
+                        grid = create_grid("Note has been deleted.")
+                        console.print(grid)
 
-                if option.startswith("delete"):
-                    note_to_delete = option.replace("delete", "").strip()
-                    # TODO 11: Add method to delete whole note
+                    elif option == "exit":
+                        break
 
-                elif option == "exit":
-                    break
+                    else:
+                        console.print(":warning: Incorrect command. See the table above and type-in correct command.", style=COMMAND_ERROR)
+                        console.rule(style=RULER)
 
-                else:
-                    console.print(":warning: Incorrect command. See the table above and type-in correct command.", style=COMMAND_ERROR)
-                    console.rule(style=RULER)
+            else:
+                console.print(f"There are no notes tagged by: {tags}", style=INFO)
 
         elif command == "exit":
             exit()

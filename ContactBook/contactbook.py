@@ -2,7 +2,6 @@ import csv
 import re
 from datetime import date, datetime, timedelta
 from custom_errors import WrongInputError
-import pandas as pd
 import os.path
 import pandas
 
@@ -97,7 +96,6 @@ class ContactBook:
             return list_of_contacts
 
 
-
     def edit_contact(self, id_to_remove, new_contact):
         self.add_contact(new_contact)
         self.remove_contact(id_to_remove)
@@ -105,8 +103,8 @@ class ContactBook:
 
     def remove_contact(self, id_to_remove):
         data_file = pandas.read_csv(self.contact_book_file_path, index_col=0)
-        data_file = data_file.drop(data_file.index[id_to_remove])
-        data_file.to_csv(self.contact_book_file_path, index=False)
+        data_file.drop(data_file.index[id_to_remove], inplace=True)
+        data_file.to_csv(self.contact_book_file_path, index=True)
 
     def search_contact(self, phrase):
         with open(self.contact_book_file_path, "r", newline="") as fh:
@@ -120,7 +118,7 @@ class ContactBook:
         if results:
             return results
         else:
-            return "Contact not found"
+            return None
 
     def birthdays_in_days_range(self, days_range):
         start_date = datetime.now()
@@ -166,7 +164,7 @@ class ContactBook:
                 final_list = sorted(final_list, key=lambda contact: int(contact['to_birthday']))
                 return final_list
             else:
-                return 'No one has a birthday in the given range of days'
+                return None
 
     def search_note_by_tags(self, searched_tags) -> dict[str:str]:
         if isinstance(searched_tags, list) and searched_tags[0].strip().startswith('#'):
@@ -198,7 +196,7 @@ class ContactBook:
         if results:
             return results
         else:
-            return "Contact not found"
+            return None
 
     def new_id(self):
         with open(self.contact_book_file_path, "r") as fh:

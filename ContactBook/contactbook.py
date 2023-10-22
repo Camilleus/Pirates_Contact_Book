@@ -70,7 +70,7 @@ class Contact:
 
 
 class ContactBook:
-    def __init__(self, contact_book_file_path="contact_book.csv"):
+    def __init__(self, contact_book_file_path=__file__.rsplit('\\',1)[0]+"\\"+"contact_book.csv"):
         self.contact_book_file_path = contact_book_file_path
 
         self.field_names = ["name", "last_name", "_phone", "_email", "_date_of_birth", "address", "note", "tags"]

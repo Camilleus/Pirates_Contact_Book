@@ -96,18 +96,9 @@ class ContactBook:
                 list_of_contacts.append(row)
             return list_of_contacts
 
-
-    # THAT'S MY PROPOSITION :) - OKTAWIAN
-
     def edit_contact(self, id_to_remove, new_contact):
         self.add_contact(new_contact)
         self.remove_contact(id_to_remove)
-
-
-        # reader = pandas.read_csv(self.contact_book_file_path)
-        # reader.loc["id_contact", data_modified] = something
-        # reader.to_csv((self.contact_book_file_path))
-
 
     def remove_contact(self, id_to_remove):
         pass

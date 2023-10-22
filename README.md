@@ -30,8 +30,7 @@ pandas library
 
 ## How to run this Contact Book
 
-nothing simpler as that, just run main.py in your virtual environment
-or run main.py in cmd 
+nothing simpler as that, just write ```RunContactBook``` in cmd or virtual environment
 
 
 ## Working with the contact book.

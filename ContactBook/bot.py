@@ -23,7 +23,7 @@ COMMAND_ERROR = Style(color="red", bold=True)
 #---------------------------------------------------CLASS INSTANCES--------------------------------------------------#
 #--------------------------------------------------------------------------------------------------------------------#
 
-console = Console(color_system="truecolor", width=200)
+console = Console(color_system="truecolor", width=220)
 contact_book = ContactBook()
 
 
@@ -46,17 +46,17 @@ def create_grid(text):
 def print_help_screen():
 
     table = Table(title="List of commands", expand=True, title_style=TITLE, header_style=HEADER, border_style=TABLE,
-                  title_justify="center", caption_justify="center", show_lines=True, min_width=100)
+                  title_justify="center", caption_justify="center", show_lines=True, min_width=120)
 
     table.add_column("Command", justify="right", style=INFO, no_wrap=True, width=15)
-    table.add_column("Description", justify="left", style=INFO, no_wrap=True, width=20)
+    table.add_column("Description", justify="left", style=INFO, no_wrap=True, width=35)
 
     table.add_row("all", "Show all contacts")
     table.add_row("add", "Add new contact to your Contact-book")
-    table.add_row(f"search <[{COMMAND}]text or number[/]>", "Search for a contact/-s by given phrase")
+    table.add_row(f"search <[{COMMAND}]text or number[/]>", "Search for a contact/-s by given phrase to view, edit or delete it")
     table.add_row(f"sn", "Search for a contact/-s with notes")
     table.add_row(f"birthday <[{COMMAND}]days[/]>", "Check who has his birthday in coming <days>")
-    table.add_row(f"notes <[{COMMAND}]#tag1, #tag2...[/]>", "Search notes by #tag/-s")
+    table.add_row(f"notes <[{COMMAND}]#tag1, #tag2...[/]>", "Search notes by #tag/-s to view or delete it")
     table.add_row("exit", "Exit your Contact-book")
 
     console.print(table)
@@ -67,21 +67,22 @@ def print_help_screen():
 def print_all_contacts():
 
     table = Table(title="All contacts", expand=True, title_style=TITLE, header_style=HEADER, border_style=TABLE,
-                  title_justify="center", caption_justify="center", show_lines=True, min_width=100)
+                  title_justify="center", caption_justify="center", show_lines=True, min_width=210)
 
     table.add_column("No", justify="left", style=INFO, no_wrap=True, width=3)
-    table.add_column("Name", justify="center", style=INFO, no_wrap=True, width=18)
-    table.add_column("Last name", justify="center", style=INFO, no_wrap=True, width=18)
+    table.add_column("Name", justify="center", style=INFO, no_wrap=True, width=20)
+    table.add_column("Last name", justify="center", style=INFO, no_wrap=True, width=20)
     table.add_column("Phone", justify="center", style=INFO, no_wrap=True, width=15)
-    table.add_column("E-mail", justify="center", style=INFO, no_wrap=True, width=25)
-    table.add_column("Date of birth", justify="center", style=INFO, no_wrap=True, width=14)
-    table.add_column("Address", justify="center", style=INFO, width=25)
+    table.add_column("E-mail", justify="center", style=INFO, no_wrap=True, width=35)
+    table.add_column("Date of birth", justify="center", style=INFO, no_wrap=True, width=15)
+    table.add_column("Address", justify="center", style=INFO, width=35)
     table.add_column("Notes", justify="center", style=INFO)
     table.add_column("Tags", justify="center", style=INFO)
 
     list_of_contacts = contact_book.show_all_contacts()
     for no, contact in enumerate(list_of_contacts):
         contact["note"] = contact["note"].replace("_", ",")
+        contact["address"] = contact["address"].replace("_", ",")
         table.add_row(str(no + 1), contact["name"], contact["last_name"], contact["_phone"], contact["_email"],
                       contact["_date_of_birth"], contact["address"], contact["note"], contact["tags"])
 
@@ -105,7 +106,10 @@ def add_new_contact():
     last_name_is_empty = True
     while last_name_is_empty:
         last_name = console.input(f"Enter [{COMMAND}]last name[/]: ")
+        last_name = last_name.replace("-", 'Q')
+
         if len(last_name) >= 2 and last_name.isalpha():
+            last_name = last_name.replace("Q", '-')
             last_name_is_empty = False
         else:
             console.print(f":warning: Last name has to have at least 2 letters", style=COMMAND_ERROR)
@@ -147,6 +151,7 @@ def add_new_contact():
                 console.print(f":warning: {ce.message}", style=COMMAND_ERROR)
 
     address = console.input(f"Enter [{COMMAND}]address[/] [{TABLE}](optional)[/]: ")
+    address = address.replace(",", "_")
     new_contact.address = address
 
     note = console.input(f"Enter [{COMMAND}]note[/] [{TABLE}](optional)[/]: ")
@@ -204,21 +209,23 @@ def search_contacts_by_phrase(phrase):
 
         table = Table(title=f"Contacts searched by phrase: {phrase}", expand=True, title_style=TITLE,
                       header_style=HEADER, border_style=TABLE,
-                      title_justify="center", caption_justify="center", show_lines=True, min_width=100)
+                      title_justify="center", caption_justify="center", show_lines=True, min_width=210)
 
-        table.add_column("No", justify="left", style=INFO, no_wrap=True, width=5)
-        table.add_column("Name", justify="center", style=INFO, no_wrap=True, width=15)
-        table.add_column("Last name", justify="center", style=INFO, no_wrap=True, width=15)
-        table.add_column("Phone", justify="center", style=INFO, no_wrap=True, width=20)
-        table.add_column("E-mail", justify="center", style=INFO, no_wrap=True, width=25)
+        table.add_column("No", justify="left", style=INFO, no_wrap=True, width=3)
+        table.add_column("Name", justify="center", style=INFO, no_wrap=True, width=20)
+        table.add_column("Last name", justify="center", style=INFO, no_wrap=True, width=20)
+        table.add_column("Phone", justify="center", style=INFO, no_wrap=True, width=15)
+        table.add_column("E-mail", justify="center", style=INFO, no_wrap=True, width=35)
         table.add_column("Date of birth", justify="center", style=INFO, no_wrap=True, width=15)
-        table.add_column("Address", justify="center", style=INFO, width=25)
+        table.add_column("Address", justify="center", style=INFO, width=35)
         table.add_column("Notes", justify="center", style=INFO)
+        table.add_column("Tags", justify="center", style=INFO)
 
         for no, contact in enumerate(searched_contacts):
             contact["note"] = contact["note"].replace("_", ",")
+            contact["address"] = contact["address"].replace("_", ",")
             table.add_row(str(no + 1), contact["name"], contact["last_name"], contact["_phone"], contact["_email"],
-                          contact["_date_of_birth"], contact["address"], contact["note"])
+                          contact["_date_of_birth"], contact["address"], contact["note"], contact["tags"])
 
         console.print(table)
         console.rule(style=RULER)
@@ -259,15 +266,15 @@ def search_contacts_with_birthdays(no_of_days):
 
     table = Table(title=f"List of your contacts who have birthday in coming {no_of_days} days", expand=True,
                   title_style=TITLE, header_style=HEADER, border_style=TABLE, title_justify="center",
-                  caption_justify="center", show_lines=True, min_width=100)
+                  caption_justify="center", show_lines=True, min_width=120)
 
-    table.add_column("No", justify="left", style=INFO, no_wrap=True, width=5)
-    table.add_column("Name", justify="center", style=INFO, no_wrap=True, width=15)
-    table.add_column("Last name", justify="center", style=INFO, no_wrap=True, width=15)
+    table.add_column("No", justify="left", style=INFO, no_wrap=True, width=3)
+    table.add_column("Name", justify="center", style=INFO, no_wrap=True, width=20)
+    table.add_column("Last name", justify="center", style=INFO, no_wrap=True, width=20)
     table.add_column("Date of birth", justify="center", style=INFO, no_wrap=True, width=15)
     table.add_column("No of days until birthday", justify="center", style=INFO, no_wrap=False, width=15)
 
-    list_of_contacts_with_bday = contact_book.birthdays_in_days_range(int(no_of_days) + 1)
+    list_of_contacts_with_bday = contact_book.birthdays_in_days_range(int(no_of_days))
 
     if not list_of_contacts_with_bday:
         console.print(f'No one has a birthday in the given range of {no_of_days} days', style=INFO)
@@ -293,12 +300,12 @@ def search_contacts_with_notes():
     else:
         table = Table(title=f"Contacts with notes", expand=True, title_style=TITLE, header_style=HEADER,
                       border_style=TABLE,
-                      title_justify="center", caption_justify="center", show_lines=True, min_width=100)
+                      title_justify="center", caption_justify="center", show_lines=True, min_width=120)
 
         table.add_column("No", justify="left", style=INFO, no_wrap=True, width=3)
-        table.add_column("Name", justify="center", style=INFO, no_wrap=True, width=18)
-        table.add_column("Last name", justify="center", style=INFO, no_wrap=True, width=18)
-        table.add_column("Notes", justify="center", style=INFO)
+        table.add_column("Name", justify="center", style=INFO, no_wrap=True, width=20)
+        table.add_column("Last name", justify="center", style=INFO, no_wrap=True, width=20)
+        table.add_column("Notes", justify="center", style=INFO, width=100)
 
         for no, contact in enumerate(searched_contacts_with_notes):
             contact["note"] = contact["note"].replace("_", ",")
@@ -321,12 +328,12 @@ def search_notes_by_tags(tags):
         table = Table(title=f"Notes searched by given tags: {tags}", expand=True, title_style=TITLE,
                       header_style=HEADER,
                       border_style=TABLE, title_justify="center", caption_justify="center", show_lines=True,
-                      min_width=100)
+                      min_width=150)
 
-        table.add_column("No", justify="left", style=INFO, no_wrap=True, width=5)
+        table.add_column("No", justify="left", style=INFO, no_wrap=True, width=3)
         table.add_column("Notes", justify="center", style=INFO)
-        table.add_column("Name", justify="center", style=INFO, no_wrap=True, width=15)
-        table.add_column("Last name", justify="center", style=INFO, no_wrap=True, width=15)
+        table.add_column("Name", justify="center", style=INFO, no_wrap=True, width=20)
+        table.add_column("Last name", justify="center", style=INFO, no_wrap=True, width=20)
 
         for no, note in enumerate(list_of_notes):
             note["note"] = note["note"].replace("_", ",")
@@ -392,7 +399,9 @@ def edit_contact(option, no_of_contacts, searched_contacts):
             last_name_is_empty = True
             while last_name_is_empty:
                 last_name = edit_field('last_name', searched_contacts, contact_to_edit, mandatory=True)
+                last_name = last_name.replace("-", 'Q')
                 if len(last_name) >= 2 and last_name.isalpha():
+                    last_name = last_name.replace("Q", '-')
                     last_name_is_empty = False
                 else:
                     console.print(f":warning: Last name has to have at least 2 letters", style=COMMAND_ERROR)
@@ -436,6 +445,7 @@ def edit_contact(option, no_of_contacts, searched_contacts):
                         console.print(f":warning: {ce.message}", style=COMMAND_ERROR)
 
             address = edit_field('address', searched_contacts, contact_to_edit, mandatory=False)
+            address = address.replace(",", "_")
             new_contact.address = address
 
             note = edit_field('note', searched_contacts, contact_to_edit, mandatory=False)
@@ -443,6 +453,7 @@ def edit_contact(option, no_of_contacts, searched_contacts):
 
             if note:
                 tags = edit_field('tags', searched_contacts, contact_to_edit, mandatory=False)
+                tags = [tag.replace(",", "").strip() for tag in tags.split(",")]
             else:
                 tags = ""
             new_contact.note = Note(note, *tags)
@@ -493,7 +504,8 @@ def edit_field(field, searched_contacts, contact_to_edit, mandatory = False):
         elif field == 'tags':
             new_data = console.input(
                 f"Enter tags with # and separate them by comma <[{COMMAND}]#tag1, #tag2, ...[/] >: ").casefold()
-            new_data = [tag.replace(",", "").strip() for tag in new_data.split(",")]
+            if new_data:
+                new_data = [tag.replace(",", "").strip() for tag in new_data.split(",")]
             console.rule(style=RULER)
         else:
             new_data = console.input(
@@ -529,11 +541,8 @@ def delete_contact(option, no_of_contacts, searched_contacts):
         try:
 
             contact_to_remove = int(option.replace("delete", "").strip()) - 1
-            print(f"No of contact to remove from list: {contact_to_remove}")
-            print(f"Total no of contacts on the list list: {no_of_contacts}")
             if 0 <= contact_to_remove <= no_of_contacts - 1:
                 id_to_remove = int(searched_contacts[contact_to_remove].get('id'))
-                print(f"ID of contact to remove from list: {id_to_remove}")
 
                 contact_book.remove_contact(id_to_remove)
                 grid = create_grid("Contact has been deleted.")
@@ -582,8 +591,8 @@ def delete_note(option, no_of_notes, list_of_notes):
 #*******************************************************************************************************************#
 
 def bot_contact_book():
-
-    console.print(Panel(title="Welcome to Contact-book", renderable= f"I am your Bot-Assistant.\nLet me know how can I help you?"), style = INFO, justify = "center")
+    console.print("")
+    console.print(Panel(title=f"Welcome to Contact-book", renderable= f"I am your Bot-Assistant.\nLet me know how can I help you?"), style = INFO, justify = "center")
     console.print("made by: *****", style=HEADER, justify="right")
     console.rule(style = RULER)
 

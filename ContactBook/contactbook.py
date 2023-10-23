@@ -2,7 +2,6 @@ import csv
 import re
 from datetime import date, datetime, timedelta
 from custom_errors import WrongInputError
-import pandas as pd
 import os.path
 import pandas
 
@@ -70,7 +69,7 @@ class Contact:
 
 
 class ContactBook:
-    def __init__(self, contact_book_file_path=__file__.rsplit('\\',1)[0]+"\\"+"contact_book.csv"):
+    def __init__(self, contact_book_file_path="contact_book.csv"):
         self.contact_book_file_path = contact_book_file_path
 
         self.field_names = ["name", "last_name", "_phone", "_email", "_date_of_birth", "address", "note", "tags"]
@@ -96,21 +95,15 @@ class ContactBook:
                 list_of_contacts.append(row)
             return list_of_contacts
 
-
-    # THAT'S MY PROPOSITION :) - OKTAWIAN
-
     def edit_contact(self, id_to_remove, new_contact):
         self.add_contact(new_contact)
         self.remove_contact(id_to_remove)
 
-
-        # reader = pandas.read_csv(self.contact_book_file_path)
-        # reader.loc["id_contact", data_modified] = something
-        # reader.to_csv((self.contact_book_file_path))
-
-
     def remove_contact(self, id_to_remove):
-        pass
+        data_file = pandas.read_csv(self.contact_book_file_path, index_col=0)
+        data_file.drop(id_to_remove, inplace=True)
+        data_file.to_csv(self.contact_book_file_path, index=True)
+
 
     def search_contact(self, phrase):
         with open(self.contact_book_file_path, "r", newline="") as fh:
@@ -120,11 +113,11 @@ class ContactBook:
             for row in reader:
                 row_string = ",".join(row[:-2]).casefold()
                 if row_string.find(phrase.casefold()) >= 0:
-                    results.append(dict(zip(['id']+self.field_names, row)))
+                    results.append(dict(zip(['id'] + self.field_names, row)))
         if results:
             return results
         else:
-            return "Contact not found"
+            return None
 
     def birthdays_in_days_range(self, days_range):
         start_date = datetime.now()
@@ -138,14 +131,14 @@ class ContactBook:
                         row["_date_of_birth"], '%Y-%m-%d')
 
                     date_start_year = datetime(year=start_date.year,
-                                                 month=date_obj.month, day=date_obj.day)
-                    date_end_year = datetime(year=end_date.year,
                                                month=date_obj.month, day=date_obj.day)
+                    date_end_year = datetime(year=end_date.year,
+                                             month=date_obj.month, day=date_obj.day)
 
                     if start_date < date_start_year <= end_date or start_date < date_end_year <= end_date:
-                          init_list.append(row)
+                        init_list.append(row)
                 else:
-                      pass
+                    pass
             if init_list:
                 list_sorted = sorted(
                     init_list, key=lambda row: row["_date_of_birth"][5:])
@@ -154,10 +147,10 @@ class ContactBook:
                     date_obj = datetime.strptime(
                         element["_date_of_birth"], '%Y-%m-%d')
                     date_to_check = datetime(year=start_date.year,
-                                               month=date_obj.month, day=date_obj.day)
+                                             month=date_obj.month, day=date_obj.day)
                     if date_to_check < start_date:
                         date_to_cal = datetime(
-                            year=start_date.year+1, month=date_obj.month, day=date_obj.day)
+                            year=start_date.year + 1, month=date_obj.month, day=date_obj.day)
                         delta = date_to_cal - start_date
                         element['to_birthday'] = str(delta.days)
                         final_list.append(element)
@@ -170,27 +163,27 @@ class ContactBook:
                 final_list = sorted(final_list, key=lambda contact: int(contact['to_birthday']))
                 return final_list
             else:
-                return 'No one has a birthday in the given range of days'
+                return None
 
-    def search_note_by_tags(self,searched_tags)->dict[str:str]:
-        if isinstance(searched_tags,list) and searched_tags[0].strip().startswith('#'):
-            searched_tags=''.join(searched_tags)
-        if isinstance(searched_tags,str):
-            searched_tags=searched_tags.split('#')[1:]
-        answer_list=list()
-        with open(self.contact_book_file_path,'r') as fh:
-            list_of_contacts=csv.DictReader(fh,['id']+self.field_names)
+    def search_note_by_tags(self, searched_tags) -> dict[str:str]:
+        if isinstance(searched_tags, list) and searched_tags[0].strip().startswith('#'):
+            searched_tags = ''.join(searched_tags)
+        if isinstance(searched_tags, str):
+            searched_tags = searched_tags.split('#')[1:]
+        answer_list = list()
+        with open(self.contact_book_file_path, 'r') as fh:
+            list_of_contacts = csv.DictReader(fh, ['id'] + self.field_names)
             for contact in list_of_contacts:
-                is_tag_in_notetags=True
+                is_tag_in_notetags = True
                 if not contact['tags']: continue
-                tags=contact['tags'].split('#')[1:]
-                tags[:]=map(lambda tag: tag.strip(),tags)
+                tags = contact['tags'].split('#')[1:]
+                tags[:] = map(lambda tag: tag.strip(), tags)
                 for tag in searched_tags:
                     if not contact['note'] or tag not in tags:
-                        is_tag_in_notetags=False
+                        is_tag_in_notetags = False
                 if is_tag_in_notetags: answer_list.append(contact)
         return answer_list
-        
+
     def search_contacts_with_notes(self):
         with open(self.contact_book_file_path, "r", newline="") as fh:
             reader = csv.reader(fh)
@@ -198,24 +191,26 @@ class ContactBook:
             next(reader)
             for row in reader:
                 if row[-2]:
-                    results.append(dict(zip(['id']+self.field_names, row)))
+                    results.append(dict(zip(['id'] + self.field_names, row)))
         if results:
             return results
         else:
-            return "Contact not found"
+            return None
 
     def new_id(self):
         with open(self.contact_book_file_path, "r") as fh:
-            reader=csv.DictReader(fh,['id']+self.field_names)
+            reader = csv.DictReader(fh, ['id'] + self.field_names)
             next(reader)
-            try: max_id=max(int(contact['id']) for contact in reader)
-            except ValueError: return 0
-        return max_id+1
+            try:
+                max_id = max(int(contact['id']) for contact in reader)
+            except ValueError:
+                return 0
+        return max_id + 1
 
-    def remove_or_edit_data(self,contact_id:int,data_to_remove:str='note',replace_value:str=None)->None:
-        data_file=pandas.read_csv(self.contact_book_file_path,index_col=0)
-        if max(data_file.index)<contact_id: raise WrongInputError("There is no contact with that index")
+    def remove_or_edit_data(self, contact_id: int, data_to_remove: str = 'note', replace_value: str = None) -> None:
+        data_file = pandas.read_csv(self.contact_book_file_path, index_col=0)
+        if max(data_file.index) < contact_id: raise WrongInputError("There is no contact with that index")
         if data_to_remove not in data_file.columns: raise WrongInputError("There is no column with that name")
-        data_file.loc[contact_id,data_to_remove]=replace_value
-        if data_to_remove=='note' and replace_value==None:  data_file.loc[contact_id,'tags']=None
+        data_file.loc[contact_id, data_to_remove] = replace_value
+        if data_to_remove == 'note' and replace_value == None:  data_file.loc[contact_id, 'tags'] = None
         data_file.to_csv(self.contact_book_file_path)

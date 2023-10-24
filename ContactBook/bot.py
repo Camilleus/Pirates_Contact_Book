@@ -3,9 +3,9 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 
-from contactbook import Contact, ContactBook
-from notes import Note
-from custom_errors import WrongInputError
+from ContactBook.contactbook import Contact, ContactBook
+from ContactBook.notes import Note
+from ContactBook.custom_errors import WrongInputError
 
 #--------------------------------------------------------------------------------------------------------------------#
 #---------------------------------------------------STYLE CONSTANTS--------------------------------------------------#
@@ -453,7 +453,10 @@ def edit_contact(option, no_of_contacts, searched_contacts):
 
             if note:
                 tags = edit_field('tags', searched_contacts, contact_to_edit, mandatory=False)
-                tags = [tag.replace(",", "").strip() for tag in tags.split(",")]
+                if type(tags)==list: 
+                    tags=[tag.replace(",", "").strip() for tag in tags]
+                else:
+                    tags = [tag.replace(",", "").strip() for tag in tags.split(",")]
             else:
                 tags = ""
             new_contact.note = Note(note, *tags)

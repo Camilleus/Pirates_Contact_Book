@@ -12,7 +12,7 @@ setup(
     author="<*****>",
     license='MIT',
     packages=find_packages(),
-    install_requires=[],
+    install_requires=['rich','pandas'],
     keywords=['contact', 'book'],
     classifiers=[
         "Development Status :: 3 - Alpha",
@@ -20,6 +20,6 @@ setup(
         'License :: OSI Approved :: MIT License',
         'Topic :: Communications :: Telephony',
         "Programming Language :: Python :: 3",
-    ]
-    entry_points={'console_scripts':['RunContactBook = 5_Stars_Contact_Book.main.py:bot_contact_book']}
+    ],
+    entry_points={'console_scripts':['RunContactBook = ContactBook.bot:bot_contact_book']}
 )

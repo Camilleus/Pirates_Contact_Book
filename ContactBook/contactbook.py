@@ -1,7 +1,7 @@
 import csv
 import re
 from datetime import date, datetime, timedelta
-from custom_errors import WrongInputError
+from ContactBook.custom_errors import WrongInputError
 import os.path
 import pandas
 
@@ -69,7 +69,7 @@ class Contact:
 
 
 class ContactBook:
-    def __init__(self, contact_book_file_path="contact_book.csv"):
+    def __init__(self, contact_book_file_path=__file__.rsplit('\\',1)[0]+"\\"+"contact_book.csv"):
         self.contact_book_file_path = contact_book_file_path
 
         self.field_names = ["name", "last_name", "_phone", "_email", "_date_of_birth", "address", "note", "tags"]
@@ -88,7 +88,7 @@ class ContactBook:
         df.to_csv(self.contact_book_file_path, mode="a", index=True, header=False)
 
     def show_all_contacts(self):
-        with open('contact_book.csv', newline='') as fh:
+        with open(self.contact_book_file_path, newline='') as fh:
             list_of_contacts = []
             reader = csv.DictReader(fh)
             for row in reader:

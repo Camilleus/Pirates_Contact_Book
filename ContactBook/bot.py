@@ -3,9 +3,14 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 
-from ContactBook.contactbook import Contact, ContactBook
-from ContactBook.notes import Note
-from ContactBook.custom_errors import WrongInputError
+try:
+    from ContactBook.contactbook import Contact, ContactBook
+    from ContactBook.notes import Note
+    from ContactBook.custom_errors import WrongInputError
+except ModuleNotFoundError:
+    from contactbook import Contact, ContactBook
+    from notes import Note
+    from custom_errors import WrongInputError
 
 #--------------------------------------------------------------------------------------------------------------------#
 #---------------------------------------------------STYLE CONSTANTS--------------------------------------------------#

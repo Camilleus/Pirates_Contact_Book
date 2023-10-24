@@ -588,9 +588,9 @@ def delete_note(option, no_of_notes, list_of_notes):
         except IndexError:
             console.print(":warning: Index out of range. Try again.", style=COMMAND_ERROR)
 
-        except ValueError:
-            console.print(":warning: You have to enter valid number of a note to delete. Try again.",
-                          style=COMMAND_ERROR)
+        # except ValueError:
+        #     console.print(":warning: You have to enter valid number of a note to delete. Try again.",
+        #                   style=COMMAND_ERROR)
 
         finally:
             console.rule(style=RULER)

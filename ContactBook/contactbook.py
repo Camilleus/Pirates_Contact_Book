@@ -123,7 +123,7 @@ class ContactBook:
         today_date = datetime.now().date()
         end_date = (datetime.now() + timedelta(days=int(days_range))).date()
         result_list = []
-        with open('contact_book.csv', newline='') as fh:
+        with open(self.contact_book_file_path, newline='') as fh:
             reader = csv.DictReader(fh)
             for row in reader:
                 if row["_date_of_birth"]:

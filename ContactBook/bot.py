@@ -263,29 +263,31 @@ def search_contacts_by_phrase(phrase):
 
 # ----------------------------------------SEARCHING FOR CONTACTS WITH B-DAYS-----------------------------------------#
 def search_contacts_with_birthdays(no_of_days):
+    try:
+        table = Table(title=f"List of your contacts who have birthday in coming {no_of_days} days", expand=True,
+                    title_style=TITLE, header_style=HEADER, border_style=TABLE, title_justify="center",
+                    caption_justify="center", show_lines=True, min_width=120)
 
-    table = Table(title=f"List of your contacts who have birthday in coming {no_of_days} days", expand=True,
-                  title_style=TITLE, header_style=HEADER, border_style=TABLE, title_justify="center",
-                  caption_justify="center", show_lines=True, min_width=120)
+        table.add_column("No", justify="left", style=INFO, no_wrap=True, width=3)
+        table.add_column("Name", justify="center", style=INFO, no_wrap=True, width=20)
+        table.add_column("Last name", justify="center", style=INFO, no_wrap=True, width=20)
+        table.add_column("Date of birth", justify="center", style=INFO, no_wrap=True, width=15)
+        table.add_column("No of days until birthday", justify="center", style=INFO, no_wrap=False, width=15)
 
-    table.add_column("No", justify="left", style=INFO, no_wrap=True, width=3)
-    table.add_column("Name", justify="center", style=INFO, no_wrap=True, width=20)
-    table.add_column("Last name", justify="center", style=INFO, no_wrap=True, width=20)
-    table.add_column("Date of birth", justify="center", style=INFO, no_wrap=True, width=15)
-    table.add_column("No of days until birthday", justify="center", style=INFO, no_wrap=False, width=15)
+        list_of_contacts_with_bday = contact_book.birthdays_in_days_range(int(no_of_days))
 
-    list_of_contacts_with_bday = contact_book.birthdays_in_days_range(int(no_of_days))
+        if not list_of_contacts_with_bday:
+            console.print(f'No one has a birthday in the given range of {no_of_days} days', style=INFO)
 
-    if not list_of_contacts_with_bday:
-        console.print(f'No one has a birthday in the given range of {no_of_days} days', style=INFO)
+        else:
+            for no, contact in enumerate(list_of_contacts_with_bday):
+                table.add_row(str(no + 1), contact["name"], contact["last_name"], contact["_date_of_birth"],
+                            contact['to_birthday'])
+            console.print(table)
 
-    else:
-        for no, contact in enumerate(list_of_contacts_with_bday):
-            table.add_row(str(no + 1), contact["name"], contact["last_name"], contact["_date_of_birth"],
-                          contact['to_birthday'])
-        console.print(table)
-
-    console.rule(style=RULER)
+        console.rule(style=RULER)
+    except (OverflowError):
+        print("The number of days given is too high")
 
 
 # -----------------------------------------SEARCHING FOR CONTACTS WITH NOTES-----------------------------------------#
@@ -622,7 +624,7 @@ def bot_contact_book():
         elif command == "sn":
             search_contacts_with_notes()
 
-        elif command.startswith("birthday") :
+        elif command.startswith("birthday"):
             no_of_days = command.replace("birthday", "").strip()
             if no_of_days.isdigit():
                 search_contacts_with_birthdays(no_of_days)

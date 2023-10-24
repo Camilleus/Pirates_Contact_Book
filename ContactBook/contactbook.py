@@ -1,7 +1,10 @@
 import csv
 import re
 from datetime import date, datetime, timedelta
-from ContactBook.custom_errors import WrongInputError
+try:
+    from ContactBook.custom_errors import WrongInputError
+except ModuleNotFoundError:
+    from custom_errors import WrongInputError
 import os.path
 import pandas
 

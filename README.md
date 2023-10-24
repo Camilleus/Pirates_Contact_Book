@@ -20,6 +20,12 @@ It's simple, just install our app with command
 
 (À propos, copy it to terminal ;D)
 
+If this doesn't work you can install it from the source code.
+
+Download source code as zip. Unpack it and enter this to cmd terminal with correct path
+
+```pip install /path/to/repository/with/code/.```
+
 ## Requirements:
 
 Python 3.6 or newer

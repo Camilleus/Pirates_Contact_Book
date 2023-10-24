@@ -129,10 +129,10 @@ class ContactBook:
                 if row["_date_of_birth"]:
                     date_obj = datetime.strptime(row["_date_of_birth"], "%Y-%m-%d")
                     date_obj_start = datetime(year=today_date.year, month=date_obj.month, day=date_obj.day).date()
-                    date_obj_end = datetime(year=end_date.year, month=date_obj.month, day=date_obj.day).date()
+                    date_obj_end = datetime(year=(today_date.year+1), month=date_obj.month, day=date_obj.day).date()
                     if end_date.year == today_date.year:
                         if end_date >= date_obj_start >= today_date:
-                            difference = date_obj_end - today_date
+                            difference = date_obj_start - today_date
                             row["to_birthday"] = str(difference.days)
                             result_list.append(row)
                     else:

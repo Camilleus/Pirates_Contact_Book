@@ -123,50 +123,34 @@ class ContactBook:
             return None
 
     def birthdays_in_days_range(self, days_range):
-        start_date = datetime.now()
-        end_date = datetime.now() + timedelta(days=days_range)
-        init_list = []
-        with open('contact_book.csv', newline='') as fh:
+        today_date = datetime.now().date()
+        end_date = (datetime.now() + timedelta(days=int(days_range))).date()
+        result_list = []
+        with open(self.contact_book_file_path, newline='') as fh:
             reader = csv.DictReader(fh)
             for row in reader:
                 if row["_date_of_birth"]:
-                    date_obj = datetime.strptime(
-                        row["_date_of_birth"], '%Y-%m-%d')
-
-                    date_start_year = datetime(year=start_date.year,
-                                               month=date_obj.month, day=date_obj.day)
-                    date_end_year = datetime(year=end_date.year,
-                                             month=date_obj.month, day=date_obj.day)
-
-                    if start_date < date_start_year <= end_date or start_date < date_end_year <= end_date:
-                        init_list.append(row)
-                else:
-                    pass
-            if init_list:
-                list_sorted = sorted(
-                    init_list, key=lambda row: row["_date_of_birth"][5:])
-                final_list = []
-                for element in list_sorted:
-                    date_obj = datetime.strptime(
-                        element["_date_of_birth"], '%Y-%m-%d')
-                    date_to_check = datetime(year=start_date.year,
-                                             month=date_obj.month, day=date_obj.day)
-                    if date_to_check < start_date:
-                        date_to_cal = datetime(
-                            year=start_date.year + 1, month=date_obj.month, day=date_obj.day)
-                        delta = date_to_cal - start_date
-                        element['to_birthday'] = str(delta.days)
-                        final_list.append(element)
+                    date_obj = datetime.strptime(row["_date_of_birth"], "%Y-%m-%d")
+                    date_obj_start = datetime(year=today_date.year, month=date_obj.month, day=date_obj.day).date()
+                    date_obj_end = datetime(year=(today_date.year+1), month=date_obj.month, day=date_obj.day).date()
+                    if end_date.year == today_date.year:
+                        if end_date >= date_obj_start >= today_date:
+                            difference = date_obj_start - today_date
+                            row["to_birthday"] = str(difference.days)
+                            result_list.append(row)
                     else:
-                        date_to_cal = datetime(
-                            year=start_date.year, month=date_obj.month, day=date_obj.day)
-                        delta = date_to_cal - start_date
-                        element['to_birthday'] = str(delta.days)
-                        final_list.append(element)
-                final_list = sorted(final_list, key=lambda contact: int(contact['to_birthday']))
-                return final_list
-            else:
-                return None
+                        if date_obj_start >= today_date:
+                            difference = date_obj_start - today_date
+                            row["to_birthday"] = str(difference.days)
+                            result_list.append(row)
+                        elif date_obj_end <= end_date:
+                            difference = date_obj_end - today_date
+                            row["to_birthday"] = str(difference.days)
+                            result_list.append(row)
+        if result_list:
+            return sorted(result_list, key=lambda contact: int(contact["to_birthday"]))
+        else:
+            return None
 
     def search_note_by_tags(self, searched_tags) -> dict[str:str]:
         if isinstance(searched_tags, list) and searched_tags[0].strip().startswith('#'):

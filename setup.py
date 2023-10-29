@@ -21,5 +21,5 @@ setup(
         'Topic :: Communications :: Telephony',
         "Programming Language :: Python :: 3",
     ],
-    entry_points={'console_scripts':['RunContactBook = ContactBook.bot:bot_contact_book']}
+    entry_points={'console_scripts':['RunContactBook = ContactBook.main:bot_contact_book']}
 )
